@@ -155,39 +155,50 @@ export const MapView: React.FC<MapViewProps> = ({
     applyZoomAt((z) => z * (e.deltaY < 0 ? 1.15 : 0.87), fx, fy);
   };
 
+  // Memoized region SVG paths (zero per-frame string recalculations)
+  const regionPathsMap = React.useMemo(() => {
+    const m = new Map<number, string>();
+    for (const r of map.regions) {
+      if (r.svgPath) {
+        m.set(r.id, r.svgPath);
+      } else if (r.polygon && r.polygon.length > 0) {
+        m.set(r.id, `M ${r.polygon.map((p) => `${p[0]},${p[1]}`).join(' L ')} Z`);
+      } else {
+        m.set(r.id, '');
+      }
+    }
+    return m;
+  }, [map.regions]);
+
+  const transformGroupRef = useRef<SVGGElement | null>(null);
+
   // Latest-value mirrors so the native touch listeners never need re-binding.
-  // (Previously the listener effect depended on [pan, zoom], which removed and
-  // re-added all four listeners on every single touchmove frame.)
   const panRef = useRef(pan);
   const zoomRef = useRef(zoom);
   const clampRef = useRef(clampPan);
+  const viewScaleRef = useRef(viewScale);
   panRef.current = pan;
   zoomRef.current = zoom;
   clampRef.current = clampPan;
+  viewScaleRef.current = viewScale;
 
-  // 60fps/120fps requestAnimationFrame batching for smooth touch pan & zoom gestures
-  const rafId = useRef<number | null>(null);
-  const pendingPan = useRef<{ x: number; y: number } | null>(null);
-  const pendingZoom = useRef<number | null>(null);
+  // Direct Hardware Transform (Zero React Re-renders during active drag/pinch gestures)
+  const updateTransformDirect = React.useCallback(
+    (nextPan: { x: number; y: number }, nextZoom?: number) => {
+      panRef.current = nextPan;
+      if (nextZoom !== undefined) zoomRef.current = nextZoom;
 
-  const scheduleUpdate = React.useCallback((nextPan: { x: number; y: number }, nextZoom?: number) => {
-    pendingPan.current = nextPan;
-    if (nextZoom !== undefined) pendingZoom.current = nextZoom;
-
-    if (rafId.current === null) {
-      rafId.current = requestAnimationFrame(() => {
-        rafId.current = null;
-        if (pendingPan.current) {
-          setPan(pendingPan.current);
-          pendingPan.current = null;
-        }
-        if (pendingZoom.current !== null) {
-          setZoom(pendingZoom.current);
-          pendingZoom.current = null;
-        }
-      });
-    }
-  }, []);
+      const g = transformGroupRef.current;
+      if (g) {
+        const scale = viewScaleRef.current;
+        const tx = scale > 0 ? nextPan.x / scale : 0;
+        const ty = scale > 0 ? nextPan.y / scale : 0;
+        const z = zoomRef.current;
+        g.style.transform = `translate(${tx}px, ${ty}px) scale(${z})`;
+      }
+    },
+    []
+  );
 
   // Native Touch Event Listeners for 2-finger Pinch & 1-finger Drag
   useEffect(() => {
@@ -239,7 +250,7 @@ export const MapView: React.FC<MapViewProps> = ({
         if (Math.hypot(rawX - pan.x, rawY - pan.y) > 6) {
           hasMoved.current = true;
         }
-        scheduleUpdate(clamp(rawX, rawY, zoom));
+        updateTransformDirect(clamp(rawX, rawY, zoom));
       } else if (e.touches.length === 2 && isPinching.current) {
         // 2-finger pinch to zoom with boundary clamping
         const t1 = e.touches[0];
@@ -262,7 +273,7 @@ export const MapView: React.FC<MapViewProps> = ({
         const rawPanX = cx - (cx - p0.x) * (newZoom / s0);
         const rawPanY = cy - (cy - p0.y) * (newZoom / s0);
 
-        scheduleUpdate(clamp(rawPanX, rawPanY, newZoom), newZoom);
+        updateTransformDirect(clamp(rawPanX, rawPanY, newZoom), newZoom);
       }
     };
 
@@ -270,6 +281,11 @@ export const MapView: React.FC<MapViewProps> = ({
       if (e.touches.length === 0) {
         isDragging.current = false;
         isPinching.current = false;
+        // Sync final position to React state once gesture completes
+        if (hasMoved.current) {
+          setPan(panRef.current);
+          setZoom(zoomRef.current);
+        }
       } else if (e.touches.length === 1) {
         // Re-anchor single finger drag after releasing one finger
         isPinching.current = false;
@@ -287,15 +303,12 @@ export const MapView: React.FC<MapViewProps> = ({
     el.addEventListener('touchcancel', handleTouchEnd, { passive: true });
 
     return () => {
-      if (rafId.current !== null) {
-        cancelAnimationFrame(rafId.current);
-      }
       el.removeEventListener('touchstart', handleTouchStart);
       el.removeEventListener('touchmove', handleTouchMove);
       el.removeEventListener('touchend', handleTouchEnd);
       el.removeEventListener('touchcancel', handleTouchEnd);
     };
-  }, [scheduleUpdate]);
+  }, [updateTransformDirect]);
 
   // Pointer event handlers for desktop mouse dragging
   const onPointerDown = (e: React.PointerEvent) => {
@@ -309,15 +322,19 @@ export const MapView: React.FC<MapViewProps> = ({
     if (e.pointerType !== 'mouse' || !isDragging.current) return;
     const rawX = e.clientX - dragStart.current.x;
     const rawY = e.clientY - dragStart.current.y;
-    if (Math.hypot(rawX - pan.x, rawY - pan.y) > 6) {
+    if (Math.hypot(rawX - panRef.current.x, rawY - panRef.current.y) > 6) {
       hasMoved.current = true;
     }
-    scheduleUpdate(clampPan(rawX, rawY, zoom));
+    updateTransformDirect(clampPan(rawX, rawY, zoomRef.current));
   };
 
   const onPointerUp = (e: React.PointerEvent) => {
     if (e.pointerType === 'mouse') {
       isDragging.current = false;
+      if (hasMoved.current) {
+        setPan(panRef.current);
+        setZoom(zoomRef.current);
+      }
     }
   };
 
@@ -544,6 +561,7 @@ export const MapView: React.FC<MapViewProps> = ({
 
             `pan` is stored in screen px, so it is divided by viewScale to reach user units. */}
         <g
+          ref={transformGroupRef}
           className="map-transform-layer"
           style={{
             transform: `translate(${viewScale > 0 ? pan.x / viewScale : 0}px, ${
@@ -577,7 +595,7 @@ export const MapView: React.FC<MapViewProps> = ({
               const isRepelled = animatingBattle === region.id;
               const fillColor = getRegionColor(region.id);
 
-              const pathD = polygonToPath(region);
+              const pathD = regionPathsMap.get(region.id) || polygonToPath(region);
 
               return (
                 <React.Fragment key={region.id}>
