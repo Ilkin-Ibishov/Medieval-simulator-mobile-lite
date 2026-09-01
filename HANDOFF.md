@@ -43,10 +43,20 @@ npm run typecheck && npm test && npm run sim -- --games 500
 
 ## Hazırkı vəziyyət (bitmiş fazalar)
 
-`npm run typecheck` və `npm test` (20/20) təmizdir. Bitmiş: Faza 0 (ölçmə bazası), Faza 1
-(kamera — zoom/pan/portret xəritə), Faza 3 (mexanika balansı — fəth 1%→45%, churn 501→42),
-Faza 4 (səs/animasiya juice — nəticə-əsaslı səslər, görünən AI növbəsi), Faza S-a
-(simultaneous raund core-u `src/core/round.ts`-də qurulub, testlənib, ölçülüb).
+`npm run typecheck` və `npm test` (28/28) 100% təmizdir. Bitmiş:
+- **Faza 0** (ölçmə bazası)
+- **Faza 1** (kamera — zoom/pan/portret xəritə)
+- **Faza 3** (mexanika balansı — fəth 1%→45%, churn 501→42)
+- **Faza 4** (səs/animasiya juice — nəticə-əsaslı səslər, görünən AI növbəsi)
+- **Faza S** (simultaneous raund core-u `src/core/round.ts`-də qurulub, testlənib, ölçülüb)
+- **Faza Atlas (Dozia Grand Campaign):**
+  - Azgaar GeoJSON cells pre-compilation (11,964 cells dissolved into 117 unified provinces).
+  - 1044-point calibration zero-drift projection ($X = 48.365 \times \text{Lon} + 768$, $Y = -48.496 \times \text{Lat} + 362.6$).
+  - Green's Theorem 2D area-weighted centroids.
+  - 10-kingdom asymmetric campaign lobby setup.
+  - Pure sovereign kingdom color rendering (no background bleed).
+  - Sea lane connectivity for island archipelagos.
+  - Git repository & Vercel live production deployment (`https://medieval-sim-lite.vercel.app`).
 
 ## AÇIQ İŞ — buradan davam et
 
