@@ -543,19 +543,6 @@ export const MapView: React.FC<MapViewProps> = ({
             transformOrigin: `${map.width / 2}px ${map.height / 2}px`,
           }}
         >
-          {/* Master Vector Background Image if available */}
-          {map.svgAsset && (
-            <image
-              href={map.svgAsset}
-              x="0"
-              y="0"
-              width={map.width}
-              height={map.height}
-              preserveAspectRatio="xMidYMid meet"
-              style={{ pointerEvents: 'none' }}
-            />
-          )}
-
           {/* Region Polygons */}
           <g className="regions-layer">
             {map.regions.map((region: Region) => {
@@ -572,16 +559,6 @@ export const MapView: React.FC<MapViewProps> = ({
 
               return (
                 <React.Fragment key={region.id}>
-                  {/* Opaque neutralization base if map has raster/svg background */}
-                  {map.svgAsset && (
-                    <path
-                      d={pathD}
-                      fill="#1a140d"
-                      fillOpacity={0.7}
-                      pointerEvents="none"
-                    />
-                  )}
-
                   {/* Sovereign Kingdom Color Layer */}
                   <path
                     d={pathD}
@@ -762,6 +739,8 @@ export const MapView: React.FC<MapViewProps> = ({
             {map.regions.map((region: Region) => {
               const visibility = getRegionVisibility(gameState, activePlayer, region.id);
               const isFogged = visibility === 'FOGGED';
+              if (isFogged) return null;
+
               const rState = regionState[region.id];
               const [cx, cy] = region.center;
               const isSelected = selectedRegion === region.id;
@@ -775,7 +754,7 @@ export const MapView: React.FC<MapViewProps> = ({
                 <g
                   key={`badge-${region.id}`}
                   transform={`translate(${cx}, ${cy})`}
-                  className={`troop-badge-group ${isFogged ? 'troop-badge-fogged' : ''}`}
+                  className="troop-badge-group"
                   onClick={(e) => {
                     if (!hasMoved.current) {
                       e.stopPropagation();
@@ -826,56 +805,50 @@ export const MapView: React.FC<MapViewProps> = ({
 
                   {/* Troop Seal Circle */}
                   <circle
-                    r={isSelected ? 16 : isFogged ? 12 : 14}
+                    r={isSelected ? 16 : 14}
                     fill={
-                      isFogged
-                        ? '#140f0a'
-                        : hasExhausted && isOwned && ready === 0
+                      hasExhausted && isOwned && ready === 0
                         ? '#241a10'
                         : '#1d1710'
                     }
                     stroke={
                       isSelected
                         ? '#d9a43a'
-                        : isFogged
-                        ? '#3d3122'
                         : hasExhausted && isOwned
                         ? '#a99878'
                         : '#6b5f45'
                     }
-                    strokeWidth={isSelected ? 2.5 : isFogged ? 1.0 : 1.5}
+                    strokeWidth={isSelected ? 2.5 : 1.5}
                     strokeDasharray={hasExhausted && isOwned && ready === 0 ? '3 2' : undefined}
                     className="troop-circle"
                   />
 
-                  {/* Troop Count or Fogged '?' */}
+                  {/* Troop Count */}
                   <text
                     textAnchor="middle"
                     dy="4"
                     fill={
-                      isFogged
-                        ? '#7a6850'
-                        : hasExhausted && isOwned && ready === 0
+                      hasExhausted && isOwned && ready === 0
                         ? '#a99878'
                         : '#f5ecd8'
                     }
-                    fontSize={isSelected ? '12' : isFogged ? '10' : '11'}
+                    fontSize={isSelected ? '12' : '11'}
                     fontWeight="bold"
                     fontFamily="'Noto Serif', Georgia, serif"
                     pointerEvents="none"
                   >
-                    {isFogged ? '?' : displayedTroops[region.id] ?? rState?.troops ?? 0}
+                    {displayedTroops[region.id] ?? rState?.troops ?? 0}
                   </text>
 
                   {/* Region Name text under seal */}
                   <text
                     textAnchor="middle"
-                    dy={isFogged ? '24' : '26'}
-                    fill={isFogged ? '#8a7d68' : '#e8dcc0'}
+                    dy="26"
+                    fill="#e8dcc0"
                     stroke="#1d1710"
                     strokeWidth="2.5"
                     paintOrder="stroke"
-                    fontSize={isFogged ? '10' : '11'}
+                    fontSize="11"
                     fontWeight="600"
                     fontFamily="'Noto Serif', Georgia, serif"
                     pointerEvents="none"

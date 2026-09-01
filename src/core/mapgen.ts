@@ -324,7 +324,6 @@ export function getDoziaMapData(): MapData {
     name: DOZIA_MAP_METADATA.name,
     width: DOZIA_MAP_METADATA.width,
     height: DOZIA_MAP_METADATA.height,
-    svgAsset: DOZIA_MAP_METADATA.svgAsset,
     regions: DOZIA_PROVINCES.map((p) => ({
       id: p.id,
       name: p.name,

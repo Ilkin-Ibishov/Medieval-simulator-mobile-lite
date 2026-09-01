@@ -111,17 +111,8 @@ export const MockupView: React.FC<{ onBackToGame?: () => void }> = ({ onBackToGa
             style={{ transformOrigin: `${MAP_W / 2}px ${MAP_H / 2}px` }}
           >
             {/* ═══════════════════════════════════════════════════════════
-               1. AZGAAR NATIVE VECTOR MASTER ATLAS (DOZIA EMBEDDED SVG)
+               1. NATIVE DOZIA VECTOR PROVINCES
                ═══════════════════════════════════════════════════════════ */}
-            <image
-              href={DOZIA_MAP_METADATA.svgAsset}
-              x="0"
-              y="0"
-              width={MAP_W}
-              height={MAP_H}
-              preserveAspectRatio="xMidYMid meet"
-              style={{ pointerEvents: 'none' }}
-            />
 
             {/* ═══════════════════════════════════════════════════════════
                2. DYNAMIC WATERCOLOR POLITICAL PROVINCE OVERLAYS (100% NATIVE)

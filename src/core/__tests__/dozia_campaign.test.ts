@@ -9,7 +9,6 @@ describe('Dozia Grand Campaign Mode', () => {
     expect(map.regions.length).toBe(117);
     expect(map.width).toBe(1536);
     expect(map.height).toBe(730);
-    expect(map.svgAsset).toBe('/maps/dozia_master.svg');
 
     // Every province has valid neighbors, center, and income
     for (const r of map.regions) {

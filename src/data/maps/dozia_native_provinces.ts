@@ -22,7 +22,6 @@ export const DOZIA_MAP_METADATA = {
   name: "Dozia (117 Connected Native Provinces)",
   width: 1536,
   height: 730,
-  svgAsset: "/maps/dozia_master.svg",
   provincesCount: 117,
 };
 
