@@ -618,17 +618,57 @@ export const MapView: React.FC<MapViewProps> = ({
             {players.map((pl) => {
               if (!pl.isAlive) return null;
               const owned = map.regions.filter((r) => regionState[r.id]?.owner === pl.id);
-              if (owned.length === 0) return null;
+              if (owned.length <= 1) return null; // Avoid clutter on 1-province rump realms
 
+              // Find largest contiguous landmass cluster via BFS to avoid split-realm drift
+              const ownedSet = new Set(owned.map((r) => r.id));
+              const visited = new Set<number>();
+              let largestCluster: Region[] = [];
+
+              for (const r of owned) {
+                if (visited.has(r.id)) continue;
+                const cluster: Region[] = [];
+                const queue: number[] = [r.id];
+                visited.add(r.id);
+
+                while (queue.length > 0) {
+                  const currId = queue.shift()!;
+                  const currRegion = map.regions[currId];
+                  if (currRegion) cluster.push(currRegion);
+
+                  for (const nId of currRegion.neighbors) {
+                    if (ownedSet.has(nId) && !visited.has(nId)) {
+                      visited.add(nId);
+                      queue.push(nId);
+                    }
+                  }
+                }
+
+                if (cluster.length > largestCluster.length) {
+                  largestCluster = cluster;
+                }
+              }
+
+              if (largestCluster.length === 0) return null;
+
+              // Compute centroid of the largest contiguous cluster
               let sumX = 0;
               let sumY = 0;
-              for (const r of owned) {
+              for (const r of largestCluster) {
                 sumX += r.center[0];
                 sumY += r.center[1];
               }
-              const cx = sumX / owned.length;
-              const cy = sumY / owned.length;
-              const fontSize = Math.min(32, Math.max(13, Math.sqrt(owned.length) * 7.5));
+              const cx = sumX / largestCluster.length;
+              const cy = sumY / largestCluster.length;
+
+              // Relative dominance ratio against total map regions
+              const totalRegions = Math.max(1, map.regions.length);
+              const ratio = owned.length / totalRegions;
+
+              // Proportional typography: font size, letter-spacing, and opacity scale with map share
+              const fontSize = Math.min(42, Math.max(13, Math.round(12 + Math.sqrt(ratio) * 38)));
+              const letterSpacing = `${Math.min(14, Math.max(2.5, Math.round(2.5 + ratio * 16)))}px`;
+              const opacity = Math.min(0.85, Math.max(0.40, 0.40 + ratio * 0.45));
 
               return (
                 <g key={`kingdom-title-${pl.id}`} transform={`translate(${cx}, ${cy})`}>
@@ -636,13 +676,15 @@ export const MapView: React.FC<MapViewProps> = ({
                     textAnchor="middle"
                     dominantBaseline="middle"
                     fill="#f6ebd2"
-                    opacity={0.65}
+                    stroke="#1a140d"
+                    strokeWidth={fontSize > 24 ? 3.5 : 2.5}
+                    paintOrder="stroke"
+                    opacity={opacity}
                     fontSize={fontSize}
                     fontFamily="'Noto Serif', Georgia, serif"
                     fontWeight="bold"
-                    letterSpacing="3.5px"
+                    letterSpacing={letterSpacing}
                     style={{
-                      textShadow: '0 2px 8px rgba(0,0,0,0.95), 0 0 16px rgba(0,0,0,0.8)',
                       textTransform: 'uppercase',
                       pointerEvents: 'none',
                     }}
