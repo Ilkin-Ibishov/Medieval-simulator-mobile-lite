@@ -578,27 +578,28 @@ export const MapView: React.FC<MapViewProps> = ({
 
               return (
                 <React.Fragment key={region.id}>
+                  {/* Opaque neutralization base if map has raster/svg background */}
+                  {map.svgAsset && (
+                    <path
+                      d={pathD}
+                      fill="#1a140d"
+                      fillOpacity={0.7}
+                      pointerEvents="none"
+                    />
+                  )}
+
+                  {/* Sovereign Kingdom Color Layer */}
                   <path
                     d={pathD}
                     fill={fillColor}
                     fillOpacity={
-                      map.svgAsset
-                        ? isSelected
-                          ? 0.65
-                          : isNeighbor
-                          ? 0.52
-                          : 0.38
-                        : isSelected
-                        ? 0.95
+                      isSelected
+                        ? 0.92
                         : isNeighbor
-                        ? 0.88
-                        : 0.76
+                        ? 0.85
+                        : 0.78
                     }
-                    style={
-                      map.svgAsset
-                        ? { mixBlendMode: 'multiply', transition: 'fill 0.35s ease' }
-                        : undefined
-                    }
+                    style={{ transition: 'fill 0.35s ease' }}
                     stroke={
                       isSelected
                         ? '#d9a43a'
@@ -606,9 +607,9 @@ export const MapView: React.FC<MapViewProps> = ({
                         ? '#b3554f'
                         : isNeighbor
                         ? '#5f7a68'
-                        : '#241a10'
+                        : '#1a140d'
                     }
-                    strokeWidth={isSelected || isTarget ? 3.5 : isNeighbor ? 2.5 : map.svgAsset ? 1.4 : 1.2}
+                    strokeWidth={isSelected || isTarget ? 3.5 : isNeighbor ? 2.5 : 1.4}
                     strokeDasharray={isNeighbor && !isSelected && !isTarget ? '4 3' : undefined}
                     className={`region-path ${isSelected ? 'selected' : ''} ${
                       isNeighbor ? 'neighbor-selectable' : ''
