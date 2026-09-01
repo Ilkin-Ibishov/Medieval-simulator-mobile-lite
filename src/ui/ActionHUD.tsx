@@ -73,7 +73,10 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
   // Combat preview
   const combatPreview =
     targetRState && !isFriendlyTarget
-      ? previewCombat(moveCount, targetRState.troops)
+      ? previewCombat(moveCount, targetRState.troops, {
+          isCapital: targetR?.isCapital,
+          hasFort: targetRState.building === 'FORT',
+        })
       : null;
 
   const handleHire = (count: number) => {
@@ -140,6 +143,11 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
               </span>
             )}{' '}
             · +{isFogged ? '?' : currentRegion.income}G
+            {currentRState.building && (
+              <span className="text-gold" style={{ marginLeft: 4 }}>
+                · {currentRState.building === 'FORT' ? '🏰 Qala' : '🗼 Qüllə'}
+              </span>
+            )}
           </span>
         </div>
         <button className="hud-close-btn" onClick={onDeselect} title="Bağla">
@@ -180,6 +188,47 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
                 onClick={() => handleDisband(1)}
               >
                 -1 Tərxis (+5G)
+              </button>
+            )}
+          </div>
+
+          {/* Tactical Fortifications Row */}
+          <div className="hud-action-row" style={{ marginTop: 6 }}>
+            {currentRState.building === 'FORT' ? (
+              <span className="badge-gold text-xs" style={{ padding: '4px 8px', borderRadius: 4 }}>
+                🏰 Qala Aktiv (+2 Müdafiə)
+              </span>
+            ) : (
+              <button
+                className="btn btn-secondary btn-sm"
+                disabled={effectiveTreasury < RULES.fortCost}
+                onClick={() => {
+                  sounds.playHire();
+                  haptics.medium();
+                  onApplyAction({ type: 'BUILD', regionId: selectedRegion, building: 'FORT' });
+                }}
+                title="Qala: Müdafiə olunan qoşunlara +2 döyüş gücü verir"
+              >
+                🏰 Qala ({RULES.fortCost}G)
+              </button>
+            )}
+
+            {currentRState.building === 'WATCHTOWER' ? (
+              <span className="badge-primary text-xs" style={{ padding: '4px 8px', borderRadius: 4 }}>
+                🗼 Qüllə Aktiv (2-hop Kəşfiyyat)
+              </span>
+            ) : (
+              <button
+                className="btn btn-secondary btn-sm"
+                disabled={effectiveTreasury < RULES.watchtowerCost}
+                onClick={() => {
+                  sounds.playHire();
+                  haptics.medium();
+                  onApplyAction({ type: 'BUILD', regionId: selectedRegion, building: 'WATCHTOWER' });
+                }}
+                title="Müşahidə Qülləsi: Dumanı 2 qat dərinliyinə açır"
+              >
+                🗼 Qüllə ({RULES.watchtowerCost}G)
               </button>
             )}
           </div>

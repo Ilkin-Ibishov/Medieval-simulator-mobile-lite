@@ -292,6 +292,32 @@ export function applyAction(prevState: GameState, action: Action): GameState {
       break;
     }
 
+    case 'BUILD': {
+      const reg = next.regionState[action.regionId];
+      if (action.building === 'WATCHTOWER') {
+        player.treasury -= RULES.watchtowerCost;
+        reg.building = 'WATCHTOWER';
+        next.events.push({
+          turn: next.turn,
+          playerId: currentActive,
+          type: 'BATTLE',
+          description: `${player.name} ${next.map.regions[action.regionId].name} əyalətində Müşahidə Qülləsi ucaltdı!`,
+        });
+      } else if (action.building === 'FORT') {
+        player.treasury -= RULES.fortCost;
+        reg.building = 'FORT';
+        next.events.push({
+          turn: next.turn,
+          playerId: currentActive,
+          type: 'BATTLE',
+          description: `${player.name} ${next.map.regions[action.regionId].name} əyalətində Qala inşa etdi!`,
+        });
+      } else {
+        reg.building = 'NONE';
+      }
+      break;
+    }
+
     case 'DISBAND': {
       const reg = next.regionState[action.regionId];
       reg.troops -= action.count;
@@ -314,12 +340,17 @@ export function applyAction(prevState: GameState, action: Action): GameState {
       } else {
         // Battle / Attack!
         const defenderOwner = toReg.owner;
-        const preview = previewCombat(action.count, toReg.troops);
+        const targetRegion = next.map.regions[action.to];
+        const preview = previewCombat(action.count, toReg.troops, {
+          isCapital: targetRegion?.isCapital,
+          hasFort: toReg.building === 'FORT',
+        });
 
         if (preview.willWin) {
           // Attacker wins and conquers the territory
           toReg.owner = currentActive;
           toReg.troops = preview.attackerSurviving;
+          toReg.building = undefined; // Fortifications razed upon conquest
           // Conquering army rests in the conquered territory for the remainder of this turn
           toReg.exhaustedTroops = preview.attackerSurviving;
 

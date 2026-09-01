@@ -32,10 +32,13 @@ export interface Region {
   terrain?: 'mountain' | 'forest' | 'plains' | 'hills';
 }
 
+export type BuildingType = 'NONE' | 'WATCHTOWER' | 'FORT';
+
 export interface RegionState {
   owner: PlayerId; // -1 for neutral (if any), 0..N for players
   troops: number;
   exhaustedTroops: number; // troops that moved or were hired in current turn (cannot march again this turn)
+  building?: BuildingType; // Optional tactical fortification
 }
 
 /** A border classified as a narrow/mountain chokepoint for rendering only — purely
@@ -87,6 +90,7 @@ export interface GameState {
 export type Action =
   | { type: 'HIRE'; regionId: number; count: number }
   | { type: 'MOVE'; from: number; to: number; count: number }
+  | { type: 'BUILD'; regionId: number; building: BuildingType }
   | { type: 'DISBAND'; regionId: number; count: number }
   | { type: 'END_TURN' };
 
@@ -113,6 +117,12 @@ export interface BalanceRules {
   capitalReconquestTurns: number;
   /** Paytaxtda dayanan müdafiəçiyə verilən əlavə güc */
   capitalDefenseBonus: number;
+  /** Müşahidə qülləsinin tikilmə xərci (Qızıl) */
+  watchtowerCost: number;
+  /** Qalanın tikilmə xərci (Qızıl) */
+  fortCost: number;
+  /** Qalada dayanan müdafiəçiyə verilən əlavə döyüş gücü */
+  fortDefenseBonus: number;
 }
 
 export interface BotPersonality {
@@ -145,6 +155,9 @@ export const RULES: BalanceRules = {
   maxTurns: 40,
   capitalReconquestTurns: 5,
   capitalDefenseBonus: 1,
+  watchtowerCost: 15,
+  fortCost: 25,
+  fortDefenseBonus: 2,
 };
 
 export const PLAYER_PALETTES: {

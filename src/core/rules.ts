@@ -46,7 +46,11 @@ export function getOwnedRegionCount(state: GameState, playerId: PlayerId): numbe
   return count;
 }
 
-export function previewCombat(attackerCount: number, defenderCount: number): CombatPreview {
+export function previewCombat(
+  attackerCount: number,
+  defenderCount: number,
+  options?: { isCapital?: boolean; hasFort?: boolean }
+): CombatPreview {
   if (attackerCount <= 0) {
     return {
       willWin: false,
@@ -58,7 +62,11 @@ export function previewCombat(attackerCount: number, defenderCount: number): Com
     };
   }
 
-  const defPower = defenderCount * RULES.defenderAdvantageRatio;
+  const effectiveDefender =
+    defenderCount +
+    (options?.isCapital ? RULES.capitalDefenseBonus : 0) +
+    (options?.hasFort ? RULES.fortDefenseBonus : 0);
+  const defPower = effectiveDefender * RULES.defenderAdvantageRatio;
 
   if (attackerCount > defPower) {
     // Attacker wins
@@ -134,6 +142,18 @@ export function canApplyAction(state: GameState, action: Action, playerId: Playe
       const neighbors = state.map.regions[action.from]?.neighbors || [];
       return neighbors.includes(action.to);
     }
+    case 'BUILD': {
+      const reg = state.regionState[action.regionId];
+      if (!reg || reg.owner !== playerId) return false;
+      if (reg.building === action.building) return false;
+      if (action.building === 'WATCHTOWER') {
+        return player.treasury >= RULES.watchtowerCost;
+      }
+      if (action.building === 'FORT') {
+        return player.treasury >= RULES.fortCost;
+      }
+      return action.building === 'NONE';
+    }
     case 'DISBAND': {
       if (action.count <= 0) return false;
       const reg = state.regionState[action.regionId];
@@ -165,7 +185,20 @@ export function getLegalActions(state: GameState, playerId: PlayerId): Action[] 
     }
   }
 
-  // 2. Move & Attack actions (Only using ready troops)
+  // 2. Fortification Building actions
+  for (let r = 0; r < state.regionState.length; r++) {
+    const reg = state.regionState[r];
+    if (reg.owner === playerId) {
+      if (reg.building !== 'FORT' && player.treasury >= RULES.fortCost) {
+        actions.push({ type: 'BUILD', regionId: r, building: 'FORT' });
+      }
+      if (reg.building !== 'WATCHTOWER' && player.treasury >= RULES.watchtowerCost) {
+        actions.push({ type: 'BUILD', regionId: r, building: 'WATCHTOWER' });
+      }
+    }
+  }
+
+  // 3. Move & Attack actions (Only using ready troops)
   for (let from = 0; from < state.regionState.length; from++) {
     const fromState = state.regionState[from];
     if (fromState.owner === playerId) {
@@ -188,7 +221,7 @@ export function getLegalActions(state: GameState, playerId: PlayerId): Action[] 
 /**
  * Calculates visibility level for a given player viewing a specific province.
  * - 'VISIBLE': The player directly owns this province. Full details visible.
- * - 'BORDER': The province directly neighbors at least one province owned by the player. Live reconnaissance.
+ * - 'BORDER': The province directly neighbors at least one province owned by the player, OR is within 2-hop watchtower reconnaissance.
  * - 'FOGGED': Deep unexplored territory. Troop numbers and movements hidden.
  */
 export function getRegionVisibility(
@@ -208,11 +241,25 @@ export function getRegionVisibility(
     return 'VISIBLE';
   }
 
-  // 2. Neighbor of any owned province
+  // 2. 1-hop: Neighbor of any owned province
   const neighbors = state.map.regions[regionId]?.neighbors || [];
   for (const nId of neighbors) {
     if (state.regionState[nId]?.owner === viewerPlayerId) {
       return 'BORDER';
+    }
+  }
+
+  // 3. 2-hop: Watchtower reconnaissance from any owned province
+  for (let r = 0; r < state.regionState.length; r++) {
+    const rSt = state.regionState[r];
+    if (rSt.owner === viewerPlayerId && rSt.building === 'WATCHTOWER') {
+      const towerNeighbors = state.map.regions[r]?.neighbors || [];
+      for (const tnId of towerNeighbors) {
+        const secondaryNeighbors = state.map.regions[tnId]?.neighbors || [];
+        if (secondaryNeighbors.includes(regionId)) {
+          return 'BORDER';
+        }
+      }
     }
   }
 

@@ -80,6 +80,20 @@ export function resolveRound(prevState: GameState, orders: RoundOrders): GameSta
         if (player.treasury < cost) continue;
         player.treasury -= cost;
         reg.troops += action.count;
+      } else if (action.type === 'BUILD') {
+        const reg = next.regionState[action.regionId];
+        if (!reg || reg.owner !== pid || reg.building === action.building) continue;
+        if (action.building === 'WATCHTOWER') {
+          if (player.treasury < RULES.watchtowerCost) continue;
+          player.treasury -= RULES.watchtowerCost;
+          reg.building = 'WATCHTOWER';
+        } else if (action.building === 'FORT') {
+          if (player.treasury < RULES.fortCost) continue;
+          player.treasury -= RULES.fortCost;
+          reg.building = 'FORT';
+        } else {
+          reg.building = 'NONE';
+        }
       } else if (action.type === 'DISBAND') {
         const reg = next.regionState[action.regionId];
         if (!reg || reg.owner !== pid || action.count <= 0) continue;
@@ -139,7 +153,8 @@ export function resolveRound(prevState: GameState, orders: RoundOrders): GameSta
 
     const garrison = reg.troops;
     const isCapitalDef = defenderId >= 0 && next.players[defenderId]?.capital === regionId;
-    const defBonus = isCapitalDef ? RULES.capitalDefenseBonus : 0;
+    const hasFort = reg.building === 'FORT';
+    const defBonus = (isCapitalDef ? RULES.capitalDefenseBonus : 0) + (hasFort ? RULES.fortDefenseBonus : 0);
     const defPower = defenderId >= 0 ? (garrison + defBonus) * RULES.defenderAdvantageRatio : garrison;
 
     // R4 — strongest force takes the province. Ties between equal-strength top attackers
@@ -166,6 +181,7 @@ export function resolveRound(prevState: GameState, orders: RoundOrders): GameSta
       const previousOwner = reg.owner;
       reg.owner = strongestAttacker.playerId;
       reg.troops = survivors;
+      reg.building = undefined; // Fortifications razed on conquest
 
       next.events.push({
         turn: next.turn,

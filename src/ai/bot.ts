@@ -110,6 +110,35 @@ export function computeBotActions(
     }
   }
 
+  // 1.5. Evaluate Fortifications (Forts on high-threat frontiers / Capital; Watchtowers on fogged borders)
+  if (virtualTreasury >= RULES.fortCost && maxThreat >= 6) {
+    const fortTarget = isCapitalLost ? undefined : (state.regionState[mostThreatenedRegion]?.building !== 'FORT' ? mostThreatenedRegion : undefined);
+    if (fortTarget !== undefined) {
+      actions.push({
+        type: 'BUILD',
+        regionId: fortTarget,
+        building: 'FORT',
+      });
+      virtualTreasury -= RULES.fortCost;
+    }
+  } else if (virtualTreasury >= RULES.watchtowerCost && state.fogOfWar) {
+    // Find a border region with fogged neighbors that lacks a watchtower
+    const watchtowerCandidate = ownedRegions.find((r) => {
+      const reg = state.regionState[r];
+      if (reg.building) return false;
+      const neighbors = state.map.regions[r].neighbors;
+      return neighbors.some((n) => state.regionState[n]?.owner !== botId);
+    });
+    if (watchtowerCandidate !== undefined) {
+      actions.push({
+        type: 'BUILD',
+        regionId: watchtowerCandidate,
+        building: 'WATCHTOWER',
+      });
+      virtualTreasury -= RULES.watchtowerCost;
+    }
+  }
+
   // A region only needs a garrison if it actually touches someone else. Purely interior
   // regions cannot be attacked directly, so emptying those is free.
   const isBorder = (r: number): boolean =>

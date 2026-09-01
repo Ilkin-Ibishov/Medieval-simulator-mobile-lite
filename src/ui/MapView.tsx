@@ -139,11 +139,54 @@ export const MapView: React.FC<MapViewProps> = ({
     haptics.light();
   };
 
-  const handleResetZoom = () => {
+  const focusOnRealm = React.useCallback(() => {
+    const owned = map.regions.filter((r) => regionState[r.id]?.owner === activePlayer);
+    if (owned.length === 0 || viewScale <= 0) return;
+
+    let sumX = 0;
+    let sumY = 0;
+    for (const r of owned) {
+      sumX += r.center[0];
+      sumY += r.center[1];
+    }
+    const realmCenterX = sumX / owned.length;
+    const realmCenterY = sumY / owned.length;
+
+    const targetZoom = 1.45;
+    const mapCenterX = map.width / 2;
+    const mapCenterY = map.height / 2;
+
+    const panX = -(realmCenterX - mapCenterX) * viewScale * targetZoom;
+    const panY = -(realmCenterY - mapCenterY) * viewScale * targetZoom;
+
+    const clamped = clampPan(panX, panY, targetZoom);
+    setZoom(targetZoom);
+    setPan(clamped);
+    if (transformGroupRef.current) {
+      transformGroupRef.current.style.transform = `translate(${clamped.x / viewScale}px, ${clamped.y / viewScale}px) scale(${targetZoom})`;
+    }
+    haptics.light();
+  }, [map.regions, regionState, activePlayer, viewScale, map.width, map.height, clampPan]);
+
+  const resetToOverview = React.useCallback(() => {
     setZoom(1.0);
     setPan({ x: 0, y: 0 });
+    if (transformGroupRef.current && viewScale > 0) {
+      transformGroupRef.current.style.transform = `translate(0px, 0px) scale(1.0)`;
+    }
     haptics.light();
-  };
+  }, [viewScale]);
+
+  // Initial Auto-Focus on Player Realm (Mobile Ergonomics)
+  const hasInitiallyFocused = useRef<boolean>(false);
+  useEffect(() => {
+    if (!hasInitiallyFocused.current && viewScale > 0 && containerSize.w > 0) {
+      hasInitiallyFocused.current = true;
+      if (containerSize.w < 600) {
+        focusOnRealm();
+      }
+    }
+  }, [viewScale, containerSize.w, focusOnRealm]);
 
   // Mouse Wheel Zoom centered at cursor
   const onWheel = (e: React.WheelEvent) => {
@@ -416,38 +459,49 @@ export const MapView: React.FC<MapViewProps> = ({
     <div
       ref={containerRef}
       className="map-viewport"
-      onWheel={onWheel}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onPointerLeave={onPointerUp}
-    >
-      {/* Floating Zoom & Pan Controls on Top Right */}
-      <div className="map-zoom-controls">
-        <button
-          className="zoom-btn"
-          onClick={handleZoomIn}
-          title="Böyüt (+)"
-        >
-          +
-        </button>
-        <button
-          className="zoom-btn"
-          onClick={handleZoomOut}
-          title="Kiçilt (−)"
-        >
-          −
-        </button>
-        {(zoom !== 1.0 || pan.x !== 0 || pan.y !== 0) && (
+        onWheel={onWheel}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerLeave={onPointerUp}
+      >
+        {/* Floating Map Navigation & Zoom Controls */}
+        <div className="map-zoom-controls">
           <button
-            className="zoom-btn zoom-btn-reset"
-            onClick={handleResetZoom}
-            title="Sıfırla"
+            className="zoom-btn"
+            onClick={handleZoomIn}
+            disabled={zoom >= MAX_ZOOM}
+            title="Böyüt (+)"
           >
-            ⟲
+            +
           </button>
-        )}
-      </div>
+          <button
+            className="zoom-btn"
+            onClick={handleZoomOut}
+            disabled={zoom <= MIN_ZOOM}
+            title="Kiçilt (−)"
+          >
+            −
+          </button>
+          <button
+            className="zoom-btn"
+            onClick={focusOnRealm}
+            title="👑 Öz Krallığına Fokuslan"
+            style={{ fontSize: 13 }}
+          >
+            👑
+          </button>
+          {(zoom !== 1.0 || pan.x !== 0 || pan.y !== 0) && (
+            <button
+              className="zoom-btn zoom-btn-reset"
+              onClick={resetToOverview}
+              title="🌍 Bütün Xəritə (Sıfırla)"
+              style={{ fontSize: 13 }}
+            >
+              🌍
+            </button>
+          )}
+        </div>
 
       <svg
         viewBox={`0 0 ${map.width} ${map.height}`}
@@ -887,6 +941,30 @@ export const MapView: React.FC<MapViewProps> = ({
                       </g>
                     );
                   })()}
+
+                  {/* Tactical Fortification Badge (Fort or Watchtower) */}
+                  {rState?.building && rState.building !== 'NONE' && (
+                    <g transform="translate(13, -12)" pointerEvents="none" className="fortification-badge">
+                      <circle
+                        cx="0"
+                        cy="0"
+                        r="7.5"
+                        fill={rState.building === 'FORT' ? '#78350f' : '#0369a1'}
+                        stroke={rState.building === 'FORT' ? '#f59e0b' : '#38bdf8'}
+                        strokeWidth="1.2"
+                      />
+                      <text
+                        x="0"
+                        y="3"
+                        textAnchor="middle"
+                        fontSize="8.5"
+                        fill="#ffffff"
+                        fontWeight="bold"
+                      >
+                        {rState.building === 'FORT' ? '🏰' : '🗼'}
+                      </text>
+                    </g>
+                  )}
 
                   {/* Troop Seal Circle */}
                   <circle
