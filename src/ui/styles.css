@@ -629,6 +629,15 @@ body::after {
   animation: pulse-border 1.5s infinite alternate;
 }
 
+.troop-badge-fogged {
+  opacity: 0.65;
+  transition: opacity 0.3s ease;
+}
+
+.troop-badge-fogged:hover {
+  opacity: 0.95;
+}
+
 .attack-arrow-animated {
   animation: attack-dash 1s linear infinite;
 }

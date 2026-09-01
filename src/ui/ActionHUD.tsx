@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { GameState, Action, RULES } from '../core/types';
-import { getReadyTroops, previewCombat } from '../core/rules';
+import { getReadyTroops, previewCombat, getRegionVisibility } from '../core/rules';
 import { SwordIcon, ShieldIcon, CoinIcon } from './Icons';
 import { sounds } from './sound';
 import { haptics } from './haptics';
@@ -33,6 +33,8 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
   const currentRState = regionState[selectedRegion];
   const player = players[activePlayer];
   const isOwned = currentRState?.owner === activePlayer;
+  const visibility = getRegionVisibility(gameState, activePlayer, selectedRegion);
+  const isFogged = visibility === 'FOGGED';
 
   // Account for planned moves already departing from this region
   const queuedDepartures =
@@ -126,13 +128,18 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
         <div className="hud-title-group">
           <span className="hud-region-name">{currentRegion.name}</span>
           <span className="hud-badge">
-            {isOwned ? '👑 Sənin' : '🏴 Düşmən'} · {currentRState.troops} Qoşun
+            {isOwned
+              ? '👑 Sənin'
+              : isFogged
+              ? '🌫️ Duman Altında'
+              : '🏴 Düşmən'}{' '}
+            · {isFogged ? '?' : currentRState.troops} Qoşun
             {isOwned && currentRState.exhaustedTroops > 0 && (
               <span className="text-muted" style={{ marginLeft: 4 }}>
                 ({availableToMove} hazır)
               </span>
             )}{' '}
-            · +{currentRegion.income}G
+            · +{isFogged ? '?' : currentRegion.income}G
           </span>
         </div>
         <button className="hud-close-btn" onClick={onDeselect} title="Bağla">
@@ -354,6 +361,15 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
               <>⚔️ Hücum Əmri Ver ({moveCount} Əsgər)</>
             )}
           </button>
+        </div>
+      )}
+
+      {/* Mode C: Unowned Fogged Region Inspected */}
+      {!isOwned && isFogged && (
+        <div className="hud-body">
+          <div className="hud-fatigue-notice">
+            🌫️ Bu ərazi kəşf edilməmiş duman altındadır. Kəşfiyyat aparmaq üçün sərhəd əyalətinə yaxınlaşın.
+          </div>
         </div>
       )}
     </div>

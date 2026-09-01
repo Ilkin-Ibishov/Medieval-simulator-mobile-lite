@@ -1,4 +1,4 @@
-import { GameState, PlayerId, Action, RULES } from './types';
+import { GameState, PlayerId, Action, RULES, VisibilityLevel } from './types';
 
 export interface CombatPreview {
   willWin: boolean;
@@ -183,4 +183,50 @@ export function getLegalActions(state: GameState, playerId: PlayerId): Action[] 
   }
 
   return actions;
+}
+
+/**
+ * Calculates visibility level for a given player viewing a specific province.
+ * - 'VISIBLE': The player directly owns this province. Full details visible.
+ * - 'BORDER': The province directly neighbors at least one province owned by the player. Live reconnaissance.
+ * - 'FOGGED': Deep unexplored territory. Troop numbers and movements hidden.
+ */
+export function getRegionVisibility(
+  state: GameState,
+  viewerPlayerId: PlayerId,
+  regionId: number
+): VisibilityLevel {
+  if (state.fogOfWar === false) {
+    return 'VISIBLE';
+  }
+
+  const regState = state.regionState[regionId];
+  if (!regState) return 'FOGGED';
+
+  // 1. Directly owned province
+  if (regState.owner === viewerPlayerId) {
+    return 'VISIBLE';
+  }
+
+  // 2. Neighbor of any owned province
+  const neighbors = state.map.regions[regionId]?.neighbors || [];
+  for (const nId of neighbors) {
+    if (state.regionState[nId]?.owner === viewerPlayerId) {
+      return 'BORDER';
+    }
+  }
+
+  return 'FOGGED';
+}
+
+/**
+ * Returns true if the region is either directly owned or on the immediate border.
+ */
+export function isRegionDiscovered(
+  state: GameState,
+  viewerPlayerId: PlayerId,
+  regionId: number
+): boolean {
+  const vis = getRegionVisibility(state, viewerPlayerId, regionId);
+  return vis === 'VISIBLE' || vis === 'BORDER';
 }

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { GameState, Region } from '../core/types';
+import { getRegionVisibility } from '../core';
 import { haptics } from './haptics';
 import type { Floater } from './App';
 
@@ -567,6 +568,8 @@ export const MapView: React.FC<MapViewProps> = ({
           {/* Region Polygons */}
           <g className="regions-layer">
             {map.regions.map((region: Region) => {
+              const visibility = getRegionVisibility(gameState, activePlayer, region.id);
+              const isFogged = visibility === 'FOGGED';
               const isSelected = selectedRegion === region.id;
               const isTarget = targetRegion === region.id;
               const isNeighbor = selectedNeighbors.has(region.id);
@@ -607,6 +610,8 @@ export const MapView: React.FC<MapViewProps> = ({
                         ? '#b3554f'
                         : isNeighbor
                         ? '#5f7a68'
+                        : isFogged
+                        ? '#221910'
                         : '#1a140d'
                     }
                     strokeWidth={isSelected || isTarget ? 3.5 : isNeighbor ? 2.5 : 1.4}
@@ -623,7 +628,19 @@ export const MapView: React.FC<MapViewProps> = ({
                     data-region={region.id}
                     data-owner={regionState[region.id]?.owner}
                     data-troops={regionState[region.id]?.troops}
+                    data-visibility={visibility}
                   />
+
+                  {/* Atmospheric Fog of War Shroud Layer */}
+                  {isFogged && (
+                    <path
+                      d={pathD}
+                      fill="#0d0905"
+                      fillOpacity={0.65}
+                      pointerEvents="none"
+                    />
+                  )}
+
                   {/* Painted-terrain grain overlay */}
                   {!map.svgAsset && (
                     <path
@@ -763,6 +780,8 @@ export const MapView: React.FC<MapViewProps> = ({
           {/* Troop Badges & Labels Layer */}
           <g className="troops-layer">
             {map.regions.map((region: Region) => {
+              const visibility = getRegionVisibility(gameState, activePlayer, region.id);
+              const isFogged = visibility === 'FOGGED';
               const rState = regionState[region.id];
               const [cx, cy] = region.center;
               const isSelected = selectedRegion === region.id;
@@ -776,7 +795,7 @@ export const MapView: React.FC<MapViewProps> = ({
                 <g
                   key={`badge-${region.id}`}
                   transform={`translate(${cx}, ${cy})`}
-                  className="troop-badge-group"
+                  className={`troop-badge-group ${isFogged ? 'troop-badge-fogged' : ''}`}
                   onClick={(e) => {
                     if (!hasMoved.current) {
                       e.stopPropagation();
@@ -784,8 +803,8 @@ export const MapView: React.FC<MapViewProps> = ({
                     }
                   }}
                 >
-                  {/* Capital Heraldic Knight Shield & Crown */}
-                  {capPlayer && (() => {
+                  {/* Capital Heraldic Knight Shield & Crown (Only if not fogged) */}
+                  {capPlayer && !isFogged && (() => {
                     const isOccupied = capPlayer.isAlive && rState?.owner !== capPlayer.id;
                     const left = Math.max(0, 5 - (capPlayer.capitalLostTurns || 0));
                     return (
@@ -827,38 +846,58 @@ export const MapView: React.FC<MapViewProps> = ({
 
                   {/* Troop Seal Circle */}
                   <circle
-                    r={isSelected ? 16 : 14}
-                    fill={hasExhausted && isOwned && ready === 0 ? '#241a10' : '#1d1710'}
-                    stroke={isSelected ? '#d9a43a' : hasExhausted && isOwned ? '#a99878' : '#6b5f45'}
-                    strokeWidth={isSelected ? 2.5 : 1.5}
+                    r={isSelected ? 16 : isFogged ? 12 : 14}
+                    fill={
+                      isFogged
+                        ? '#140f0a'
+                        : hasExhausted && isOwned && ready === 0
+                        ? '#241a10'
+                        : '#1d1710'
+                    }
+                    stroke={
+                      isSelected
+                        ? '#d9a43a'
+                        : isFogged
+                        ? '#3d3122'
+                        : hasExhausted && isOwned
+                        ? '#a99878'
+                        : '#6b5f45'
+                    }
+                    strokeWidth={isSelected ? 2.5 : isFogged ? 1.0 : 1.5}
                     strokeDasharray={hasExhausted && isOwned && ready === 0 ? '3 2' : undefined}
                     className="troop-circle"
                   />
 
-                  {/* Troop Count */}
+                  {/* Troop Count or Fogged '?' */}
                   <text
                     textAnchor="middle"
                     dy="4"
-                    fill={hasExhausted && isOwned && ready === 0 ? '#a99878' : '#f5ecd8'}
-                    fontSize={isSelected ? '12' : '11'}
+                    fill={
+                      isFogged
+                        ? '#7a6850'
+                        : hasExhausted && isOwned && ready === 0
+                        ? '#a99878'
+                        : '#f5ecd8'
+                    }
+                    fontSize={isSelected ? '12' : isFogged ? '10' : '11'}
                     fontWeight="bold"
                     fontFamily="'Noto Serif', Georgia, serif"
                     pointerEvents="none"
                   >
-                    {displayedTroops[region.id] ?? rState?.troops ?? 0}
+                    {isFogged ? '?' : displayedTroops[region.id] ?? rState?.troops ?? 0}
                   </text>
 
                   {/* Region Name text under seal */}
                   <text
                     textAnchor="middle"
-                    dy="26"
-                    fill="#e8dcc0"
+                    dy={isFogged ? '24' : '26'}
+                    fill={isFogged ? '#8a7d68' : '#e8dcc0'}
                     stroke="#1d1710"
                     strokeWidth="2.5"
                     paintOrder="stroke"
-                    fontSize="11"
+                    fontSize={isFogged ? '10' : '11'}
                     fontWeight="600"
-                    fontFamily="Noto Serif, serif"
+                    fontFamily="'Noto Serif', Georgia, serif"
                     pointerEvents="none"
                     className="region-name-label"
                   >

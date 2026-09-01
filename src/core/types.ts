@@ -68,6 +68,8 @@ export interface TurnEvent {
   winner?: PlayerId;
 }
 
+export type VisibilityLevel = 'VISIBLE' | 'BORDER' | 'FOGGED';
+
 export interface GameState {
   seed: number;
   turn: number;
@@ -79,6 +81,7 @@ export interface GameState {
   isOver: boolean;
   winner: PlayerId | null;
   events: TurnEvent[];
+  fogOfWar?: boolean;
 }
 
 export type Action =

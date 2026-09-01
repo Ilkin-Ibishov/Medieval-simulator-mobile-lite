@@ -25,6 +25,7 @@ export interface CreateGameOptions {
   maxTurns?: number;
   mapData?: MapData;
   chosenKingdomId?: number;
+  fogOfWar?: boolean;
 }
 
 export function createGame(options: CreateGameOptions): GameState {
@@ -101,6 +102,7 @@ export function createGame(options: CreateGameOptions): GameState {
       isOver: false,
       winner: null,
       events: [],
+      fogOfWar: options.fogOfWar ?? true,
     };
   }
 
@@ -248,6 +250,7 @@ export function createGame(options: CreateGameOptions): GameState {
     isOver: false,
     winner: null,
     events: [],
+    fogOfWar: options.fogOfWar ?? true,
   };
 }
 
@@ -263,6 +266,7 @@ export function cloneGameState(state: GameState): GameState {
     isOver: state.isOver,
     winner: state.winner,
     events: [...state.events],
+    fogOfWar: state.fogOfWar,
   };
 }
 
