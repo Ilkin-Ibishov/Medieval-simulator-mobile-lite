@@ -501,26 +501,6 @@ export const MapView: React.FC<MapViewProps> = ({
               strokeWidth="1"
             />
           </pattern>
-
-          {/* Same fractalNoise grain recipe as the app-wide body::after texture
-              (styles.css), reused here so the map's grain matches the rest of the
-              UI's "shared texture signature" instead of inventing a new one. */}
-          <filter id="parchment-grain" x="0%" y="0%" width="100%" height="100%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" result="noise" />
-            <feColorMatrix
-              in="noise"
-              type="matrix"
-              values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0"
-            />
-          </filter>
-
-          {/* One shared, pre-rasterized parchment tile referenced by fill="url(...)"
-              everywhere it's needed (map background + per-region overlay). Cheap:
-              the tile's feTurbulence runs once, not once per region per frame. */}
-          <pattern id="parchment-bg" width="400" height="400" patternUnits="userSpaceOnUse">
-            <rect width="400" height="400" fill="#1c1610" />
-            <rect width="400" height="400" filter="url(#parchment-grain)" opacity="0.08" />
-          </pattern>
         </defs>
 
         {/* Expansive Canvas Background (Ensures Full Cover even when panning) */}
@@ -529,7 +509,7 @@ export const MapView: React.FC<MapViewProps> = ({
           y="-3000"
           width="6000"
           height="6000"
-          fill="#0d0a06"
+          fill="#110f0d"
         />
         <rect
           x="-3000"
@@ -537,13 +517,6 @@ export const MapView: React.FC<MapViewProps> = ({
           width="6000"
           height="6000"
           fill="url(#ocean-grid)"
-        />
-        <rect
-          x="-3000"
-          y="-3000"
-          width="6000"
-          height="6000"
-          fill="url(#parchment-bg)"
         />
 
         {/* Scaled & Panned Map Layer.
@@ -655,17 +628,6 @@ export const MapView: React.FC<MapViewProps> = ({
                       d={pathD}
                       fill="#0d0905"
                       fillOpacity={0.65}
-                      pointerEvents="none"
-                    />
-                  )}
-
-                  {/* Painted-terrain grain overlay */}
-                  {!map.svgAsset && (
-                    <path
-                      d={pathD}
-                      fill="url(#parchment-bg)"
-                      fillOpacity={0.15}
-                      style={{ mixBlendMode: 'overlay' }}
                       pointerEvents="none"
                     />
                   )}
