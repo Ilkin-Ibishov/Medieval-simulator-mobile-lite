@@ -487,19 +487,32 @@ export const MapView: React.FC<MapViewProps> = ({
             <path d="M 0 1 L 10 5 L 0 9 z" fill="#5f7a68" />
           </marker>
 
-          {/* Subtle ocean grid pattern */}
+          {/* Deep Prussian Navy & Oceanic Radial Gradient */}
+          <radialGradient
+            id="ocean-canvas-gradient"
+            cx="50%"
+            cy="50%"
+            r="65%"
+          >
+            <stop offset="0%" stopColor="#141f2b" />
+            <stop offset="55%" stopColor="#0f1721" />
+            <stop offset="100%" stopColor="#080c10" />
+          </radialGradient>
+
+          {/* Portolan Nautical Navigation Grid */}
           <pattern
             id="ocean-grid"
-            width="60"
-            height="60"
+            width="80"
+            height="80"
             patternUnits="userSpaceOnUse"
           >
             <path
-              d="M 60 0 L 0 0 0 60"
+              d="M 80 0 L 0 0 0 80"
               fill="none"
-              stroke="rgba(141, 116, 66, 0.05)"
+              stroke="rgba(85, 135, 180, 0.06)"
               strokeWidth="1"
             />
+            <circle cx="80" cy="80" r="1.5" fill="rgba(100, 160, 210, 0.09)" />
           </pattern>
         </defs>
 
@@ -509,7 +522,7 @@ export const MapView: React.FC<MapViewProps> = ({
           y="-3000"
           width="6000"
           height="6000"
-          fill="#110f0d"
+          fill="url(#ocean-canvas-gradient)"
         />
         <rect
           x="-3000"
@@ -543,6 +556,36 @@ export const MapView: React.FC<MapViewProps> = ({
             transformOrigin: `${map.width / 2}px ${map.height / 2}px`,
           }}
         >
+          {/* Coastal Waterline Glow Halo (Grand Strategy Sea Ripples) */}
+          <g className="coastal-waterlines-layer" pointerEvents="none">
+            {map.regions.map((region: Region) => {
+              const pathD = regionPathsMap.get(region.id) || polygonToPath(region);
+              return (
+                <React.Fragment key={`coastal-${region.id}`}>
+                  {/* Outer soft oceanic ripple */}
+                  <path
+                    d={pathD}
+                    fill="none"
+                    stroke="#1e3448"
+                    strokeWidth="8"
+                    strokeOpacity="0.45"
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                  />
+                  {/* Inner crisp coastal waterline */}
+                  <path
+                    d={pathD}
+                    fill="none"
+                    stroke="#325370"
+                    strokeWidth="2.5"
+                    strokeOpacity="0.40"
+                    strokeLinejoin="round"
+                  />
+                </React.Fragment>
+              );
+            })}
+          </g>
+
           {/* Region Polygons */}
           <g className="regions-layer">
             {map.regions.map((region: Region) => {
