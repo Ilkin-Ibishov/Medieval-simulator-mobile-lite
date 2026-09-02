@@ -13,6 +13,7 @@ export interface GameSettings {
   playerCount: number;
   seed: number;
   maxTurns?: number;
+  scenario?: import('../core/types').CampaignScenario;
 }
 
 interface LobbyProps {

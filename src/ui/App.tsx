@@ -31,6 +31,7 @@ const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 
 export const App: React.FC = () => {
   const [screen, setScreen] = useState<'LOBBY' | 'REALM_PICKER' | 'PLAYING'>('LOBBY');
+  const [selectedScenario, setSelectedScenario] = useState<'HEGEMONY' | 'SHATTERED'>('HEGEMONY');
   const [pickingKingdomId, setPickingKingdomId] = useState<number>(10);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [hasSavedGame, setHasSavedGame] = useState<boolean>(false);
@@ -116,6 +117,7 @@ export const App: React.FC = () => {
         chosenKingdomId: settings.chosenKingdomId,
         maxTurns: 60,
         humanCount: 1,
+        scenario: settings.scenario || selectedScenario,
       });
     } else {
       newGame = createGame({
@@ -467,6 +469,7 @@ export const App: React.FC = () => {
     const doziaMap = getDoziaMapData();
     const currentStats = kingdomStatsMap.get(pickingKingdomId) || Array.from(kingdomStatsMap.values())[0];
     const allKingdomIds = Array.from(kingdomStatsMap.keys());
+    const isShattered = selectedScenario === 'SHATTERED';
 
     // Preview GameState with 10 players and zero fog
     const previewGame: GameState = {
@@ -485,20 +488,31 @@ export const App: React.FC = () => {
         capitalLostTurns: 0,
       })),
       map: doziaMap,
-      regionState: doziaMap.regions.map((r) => ({
-        owner: r.stateId !== undefined ? r.stateId - 1 : -1,
-        troops: r.isCapital ? 7 : (r.income && r.income >= 10 ? 6 : 4),
-        exhaustedTroops: 0,
-      })),
+      regionState: doziaMap.regions.map((r) => {
+        const isCap = r.isCapital;
+        if (isShattered) {
+          return {
+            owner: isCap && r.stateId !== undefined ? r.stateId - 1 : -1,
+            troops: isCap ? 8 : 2,
+            exhaustedTroops: 0,
+          };
+        }
+        return {
+          owner: r.stateId !== undefined ? r.stateId - 1 : -1,
+          troops: isCap ? 7 : (r.income && r.income >= 10 ? 6 : 4),
+          exhaustedTroops: 0,
+        };
+      }),
       isOver: false,
       winner: null,
       events: [],
       fogOfWar: false,
+      scenario: selectedScenario,
     };
 
     return (
       <div className="game-container">
-        {/* Top Floating Guide Bar */}
+        {/* Top Floating Guide & Scenario Switcher Bar */}
         <div className="realm-picker-topbar">
           <button
             className="btn-picker-back"
@@ -510,8 +524,29 @@ export const App: React.FC = () => {
           >
             ← Lobbi
           </button>
-          <div className="realm-picker-guide-pill">
-            🗺️ Hökmranlıq Etmək İstədiyin Krallığa Toxun
+
+          {/* Scenario Mode Switcher Tabs */}
+          <div className="realm-scenario-tabs">
+            <button
+              className={`scenario-tab-btn ${selectedScenario === 'HEGEMONY' ? 'active' : ''}`}
+              onClick={() => {
+                sounds.playClick();
+                haptics.light();
+                setSelectedScenario('HEGEMONY');
+              }}
+            >
+              👑 Hegemonluq
+            </button>
+            <button
+              className={`scenario-tab-btn ${selectedScenario === 'SHATTERED' ? 'active' : ''}`}
+              onClick={() => {
+                sounds.playClick();
+                haptics.light();
+                setSelectedScenario('SHATTERED');
+              }}
+            >
+              ⚔️ Sındırılmış Dünya
+            </button>
           </div>
         </div>
 
@@ -533,6 +568,7 @@ export const App: React.FC = () => {
         {/* Floating Bottom Realm Detail Sheet */}
         <RealmPickerSheet
           stats={currentStats}
+          scenario={selectedScenario}
           onConfirmStart={() => {
             handleStartGame({
               mode: 'CAMPAIGN',
@@ -541,6 +577,7 @@ export const App: React.FC = () => {
               playerCount: 10,
               seed: Math.floor(Math.random() * 99999) + 1,
               maxTurns: 60,
+              scenario: selectedScenario,
             });
           }}
           onRandomKingdom={() => {

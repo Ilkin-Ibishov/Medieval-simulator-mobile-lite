@@ -16,15 +16,19 @@ export interface RealmStats {
 
 interface RealmPickerSheetProps {
   stats: RealmStats;
+  scenario?: 'HEGEMONY' | 'SHATTERED';
   onConfirmStart: () => void;
   onRandomKingdom: () => void;
 }
 
 export const RealmPickerSheet: React.FC<RealmPickerSheetProps> = ({
   stats,
+  scenario = 'HEGEMONY',
   onConfirmStart,
   onRandomKingdom,
 }) => {
+  const isShattered = scenario === 'SHATTERED';
+
   const meta = DOZIA_KINGDOMS_METADATA[stats.id] || {
     name: stats.name,
     color: stats.color,
@@ -36,6 +40,9 @@ export const RealmPickerSheet: React.FC<RealmPickerSheetProps> = ({
   };
 
   const getDifficultyBadge = (diff: 'ASAN' | 'ORTA' | 'ÇƏTİN') => {
+    if (isShattered) {
+      return { bg: 'rgba(59, 130, 246, 0.2)', border: '#3b82f6', text: '#93c5fd', label: 'Bərabər Başlanğıc' };
+    }
     switch (diff) {
       case 'ASAN':
         return { bg: 'rgba(34, 197, 94, 0.2)', border: '#22c55e', text: '#86efac', label: 'Asan Başlanğıc' };
@@ -47,6 +54,15 @@ export const RealmPickerSheet: React.FC<RealmPickerSheetProps> = ({
   };
 
   const diffBadge = getDifficultyBadge(meta.difficulty);
+
+  const displayProvinces = isShattered ? 1 : stats.provinceCount;
+  const displayMapShare = isShattered ? 1 : stats.mapSharePercent;
+  const displayTroops = isShattered ? 8 : stats.totalTroops;
+  const displayIncome = isShattered ? 12 : stats.turnIncome;
+  const displayDescription = isShattered
+    ? 'İmperiyalar süqut edib! Yalnız paytaxt qalası və 8 seçmə qoşunla başlayırsan. 107 azad baronluğu hamıdan tez fəth etmək üçün yarış!'
+    : meta.description;
+  const displayTrait = isShattered ? '⚡ Bərabər Paytaxt Fəthi' : meta.trait;
 
   return (
     <div className="realm-picker-sheet">
@@ -78,20 +94,20 @@ export const RealmPickerSheet: React.FC<RealmPickerSheetProps> = ({
             {diffBadge.label}
           </span>
           <span className="realm-badge realm-trait-badge">
-            {meta.trait}
+            {displayTrait}
           </span>
         </div>
       </div>
 
       {/* Description */}
-      <p className="realm-description">{meta.description}</p>
+      <p className="realm-description">{displayDescription}</p>
 
       {/* Key Stats Grid */}
       <div className="realm-stats-grid">
         <div className="realm-stat-box">
           <span className="stat-label">🗺️ Ərazi Payı</span>
           <span className="stat-value text-gold">
-            {stats.provinceCount} Əyalət ({stats.mapSharePercent}%)
+            {displayProvinces} Əyalət ({displayMapShare}%)
           </span>
         </div>
         <div className="realm-stat-box">
@@ -100,11 +116,11 @@ export const RealmPickerSheet: React.FC<RealmPickerSheetProps> = ({
         </div>
         <div className="realm-stat-box">
           <span className="stat-label">⚔️ İlkin Ordu</span>
-          <span className="stat-value">{stats.totalTroops} Qoşun</span>
+          <span className="stat-value">{displayTroops} Qoşun</span>
         </div>
         <div className="realm-stat-box">
           <span className="stat-label">💰 Turn Başına Gəlir</span>
-          <span className="stat-value text-gold">+{stats.turnIncome}G</span>
+          <span className="stat-value text-gold">+{displayIncome}G</span>
         </div>
       </div>
 

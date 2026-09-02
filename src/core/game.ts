@@ -26,12 +26,14 @@ export interface CreateGameOptions {
   mapData?: MapData;
   chosenKingdomId?: number;
   fogOfWar?: boolean;
+  scenario?: import('./types').CampaignScenario;
 }
 
 export function createGame(options: CreateGameOptions): GameState {
   const seed = options.seed;
   const humanCount = options.humanCount ?? 1;
   const maxTurns = options.maxTurns || RULES.maxTurns;
+  const scenario = options.scenario ?? 'HEGEMONY';
 
   // If a pre-compiled Master Vector Map (e.g. Dozia) is provided:
   if (options.mapData) {
@@ -77,13 +79,34 @@ export function createGame(options: CreateGameOptions): GameState {
       };
     });
 
-    // Initialize provinces to their starting historical kingdom
+    const isShattered = scenario === 'SHATTERED';
+
+    // Initialize provinces to their starting historical kingdom or shattered capitals
     const regionState: RegionState[] = map.regions.map((r: Region) => {
-      const ownerIdx = r.stateId !== undefined && stateIdToPlayerIdx.has(r.stateId)
-        ? stateIdToPlayerIdx.get(r.stateId)!
-        : -1;
       const isCap = r.isCapital;
-      const baseTroops = isCap ? RULES.startingTroops + 2 : (r.income && r.income >= 10 ? 6 : 4);
+      let ownerIdx = -1;
+
+      if (isShattered) {
+        // In Shattered Realm, only Capital provinces are claimed by historical kingdoms
+        if (isCap && r.stateId !== undefined && stateIdToPlayerIdx.has(r.stateId)) {
+          ownerIdx = stateIdToPlayerIdx.get(r.stateId)!;
+        } else {
+          ownerIdx = -1; // Neutral Free Barony
+        }
+      } else {
+        // In Full Hegemony, all constitutive provinces belong to their historical kingdom
+        ownerIdx = r.stateId !== undefined && stateIdToPlayerIdx.has(r.stateId)
+          ? stateIdToPlayerIdx.get(r.stateId)!
+          : -1;
+      }
+
+      let baseTroops = 2;
+      if (ownerIdx >= 0) {
+        baseTroops = isCap ? RULES.startingTroops + 3 : (r.income && r.income >= 10 ? 6 : 4);
+      } else {
+        baseTroops = 2; // Neutral barony garrison
+      }
+
       return {
         owner: ownerIdx,
         troops: baseTroops,
@@ -103,6 +126,7 @@ export function createGame(options: CreateGameOptions): GameState {
       winner: null,
       events: [],
       fogOfWar: options.fogOfWar ?? true,
+      scenario,
     };
   }
 

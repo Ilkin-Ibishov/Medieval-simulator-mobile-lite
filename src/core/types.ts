@@ -73,6 +73,8 @@ export interface TurnEvent {
 
 export type VisibilityLevel = 'VISIBLE' | 'BORDER' | 'FOGGED';
 
+export type CampaignScenario = 'HEGEMONY' | 'SHATTERED';
+
 export interface GameState {
   seed: number;
   turn: number;
@@ -85,6 +87,7 @@ export interface GameState {
   winner: PlayerId | null;
   events: TurnEvent[];
   fogOfWar?: boolean;
+  scenario?: CampaignScenario;
 }
 
 export type Action =
