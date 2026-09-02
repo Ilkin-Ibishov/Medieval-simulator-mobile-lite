@@ -183,15 +183,18 @@ export const Lobby: React.FC<LobbyProps> = ({
 
             {/* Seed Control */}
             <div className="control-group">
-              <label className="control-label">Xəritə Kodu (Seed):</label>
+              <label htmlFor="seed-input" className="control-label">Xəritə Kodu (Seed):</label>
               <div className="seed-input-row">
                 <input
+                  id="seed-input"
+                  name="seed"
                   type="number"
                   value={seed}
                   onChange={(e) => setSeed(parseInt(e.target.value, 10) || 1)}
                   className="seed-input"
+                  aria-label="Xəritə Kodu"
                 />
-                <button className="seed-rand-btn" onClick={handleRandomizeSeed}>
+                <button className="seed-rand-btn" onClick={handleRandomizeSeed} aria-label="Təsadüfi Kod Seç">
                   <RefreshIcon size={16} />
                 </button>
               </div>
