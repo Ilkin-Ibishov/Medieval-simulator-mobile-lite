@@ -13,6 +13,8 @@ import { MockupView } from './MockupView';
 import { CoinIcon } from './Icons';
 import { sounds } from './sound';
 import { haptics } from './haptics';
+import { RealmPickerSheet, RealmStats } from './RealmPickerSheet';
+import { DOZIA_PROVINCES } from '../data/maps/dozia_native_provinces';
 import { useHardwareBack } from './useHardwareBack';
 import './styles.css';
 
@@ -28,7 +30,8 @@ const SAVE_KEY = 'medsim_lite_savegame';
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 export const App: React.FC = () => {
-  const [screen, setScreen] = useState<'LOBBY' | 'PLAYING'>('LOBBY');
+  const [screen, setScreen] = useState<'LOBBY' | 'REALM_PICKER' | 'PLAYING'>('LOBBY');
+  const [pickingKingdomId, setPickingKingdomId] = useState<number>(10);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [hasSavedGame, setHasSavedGame] = useState<boolean>(false);
 
@@ -390,6 +393,41 @@ export const App: React.FC = () => {
     }
   };
 
+  // Discover kingdom stats for realm picker
+  const kingdomStatsMap = React.useMemo(() => {
+    const map = new Map<number, RealmStats>();
+    for (const p of DOZIA_PROVINCES) {
+      const isCap = p.isCapital;
+      const baseTroops = isCap ? 7 : (p.income && p.income >= 10 ? 6 : 4);
+      const inc = p.income || 6;
+
+      if (!map.has(p.stateId)) {
+        map.set(p.stateId, {
+          id: p.stateId,
+          name: p.stateName,
+          color: p.stateColor,
+          provinceCount: 1,
+          capitalName: isCap ? p.name : '',
+          totalTroops: baseTroops,
+          turnIncome: inc,
+          mapSharePercent: 0,
+        });
+      } else {
+        const item = map.get(p.stateId)!;
+        item.provinceCount++;
+        item.totalTroops += baseTroops;
+        item.turnIncome += inc;
+        if (isCap) item.capitalName = p.name;
+      }
+    }
+
+    const totalProvinces = DOZIA_PROVINCES.length;
+    for (const item of map.values()) {
+      item.mapSharePercent = Math.round((item.provinceCount / totalProvinces) * 100);
+    }
+    return map;
+  }, []);
+
   if (isMockupOpen) {
     return (
       <MockupView
@@ -401,13 +439,17 @@ export const App: React.FC = () => {
     );
   }
 
-  if (screen === 'LOBBY' || !gameState) {
+  if (screen === 'LOBBY') {
     return (
       <>
         <Lobby
           hasSavedGame={hasSavedGame}
           onResumeGame={handleResumeGame}
           onStartGame={handleStartGame}
+          onOpenRealmPicker={() => {
+            setPickingKingdomId(10);
+            setScreen('REALM_PICKER');
+          }}
           onOpenMultiplayerModal={() => setIsMultiplayerModalOpen(true)}
           onOpenMockup={() => {
             window.location.hash = '#mockup';
@@ -420,6 +462,98 @@ export const App: React.FC = () => {
       </>
     );
   }
+
+  if (screen === 'REALM_PICKER') {
+    const doziaMap = getDoziaMapData();
+    const currentStats = kingdomStatsMap.get(pickingKingdomId) || Array.from(kingdomStatsMap.values())[0];
+    const allKingdomIds = Array.from(kingdomStatsMap.keys());
+
+    // Preview GameState with 10 players and zero fog
+    const previewGame: GameState = {
+      seed: 12345,
+      turn: 1,
+      maxTurns: 60,
+      activePlayer: 0,
+      players: Array.from(kingdomStatsMap.values()).map((k, idx) => ({
+        id: idx,
+        name: k.name,
+        color: k.color,
+        isAi: true,
+        isAlive: true,
+        treasury: 30,
+        capital: 0,
+        capitalLostTurns: 0,
+      })),
+      map: doziaMap,
+      regionState: doziaMap.regions.map((r) => ({
+        owner: r.stateId !== undefined ? r.stateId - 1 : -1,
+        troops: r.isCapital ? 7 : (r.income && r.income >= 10 ? 6 : 4),
+        exhaustedTroops: 0,
+      })),
+      isOver: false,
+      winner: null,
+      events: [],
+      fogOfWar: false,
+    };
+
+    return (
+      <div className="game-container">
+        {/* Top Floating Guide Bar */}
+        <div className="realm-picker-topbar">
+          <button
+            className="btn-picker-back"
+            onClick={() => {
+              sounds.playClick();
+              haptics.light();
+              setScreen('LOBBY');
+            }}
+          >
+            ← Lobbi
+          </button>
+          <div className="realm-picker-guide-pill">
+            🗺️ Hökmranlıq Etmək İstədiyin Krallığa Toxun
+          </div>
+        </div>
+
+        {/* Map Viewport in Realm Selection Mode */}
+        <main className="game-main-area">
+          <MapView
+            gameState={previewGame}
+            selectedRegion={null}
+            targetRegion={null}
+            onSelectRegion={() => {}}
+            isPickingRealm={true}
+            chosenKingdomId={pickingKingdomId}
+            onSelectKingdom={(kId) => {
+              setPickingKingdomId(kId);
+            }}
+          />
+        </main>
+
+        {/* Floating Bottom Realm Detail Sheet */}
+        <RealmPickerSheet
+          stats={currentStats}
+          onConfirmStart={() => {
+            handleStartGame({
+              mode: 'CAMPAIGN',
+              chosenKingdomId: pickingKingdomId,
+              regionCount: 117,
+              playerCount: 10,
+              seed: Math.floor(Math.random() * 99999) + 1,
+              maxTurns: 60,
+            });
+          }}
+          onRandomKingdom={() => {
+            const otherIds = allKingdomIds.filter((id) => id !== pickingKingdomId);
+            const randomId = otherIds[Math.floor(Math.random() * otherIds.length)];
+            setPickingKingdomId(randomId);
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (!gameState) return null;
 
   const humanPlayer = gameState.players[0];
   const netIncome = calculateNetGold(gameState, 0);

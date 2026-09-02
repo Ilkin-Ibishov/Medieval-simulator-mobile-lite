@@ -9,6 +9,9 @@ interface MapViewProps {
   selectedRegion: number | null;
   targetRegion: number | null;
   onSelectRegion: (regionId: number) => void;
+  isPickingRealm?: boolean;
+  chosenKingdomId?: number;
+  onSelectKingdom?: (kingdomId: number) => void;
   animatingConquest?: number | null;
   /** Region that just repelled an attack — held, not captured, gets its own beat. */
   animatingBattle?: number | null;
@@ -25,6 +28,9 @@ export const MapView: React.FC<MapViewProps> = ({
   selectedRegion,
   targetRegion,
   onSelectRegion,
+  isPickingRealm,
+  chosenKingdomId,
+  onSelectKingdom,
   animatingConquest,
   animatingBattle,
   actionArrow,
@@ -643,11 +649,12 @@ export const MapView: React.FC<MapViewProps> = ({
           {/* Region Polygons */}
           <g className="regions-layer">
             {map.regions.map((region: Region) => {
-              const visibility = getRegionVisibility(gameState, activePlayer, region.id);
+              const visibility = isPickingRealm ? 'VISIBLE' : getRegionVisibility(gameState, activePlayer, region.id);
               const isFogged = visibility === 'FOGGED';
-              const isSelected = selectedRegion === region.id;
+              const isChosenKingdom = isPickingRealm && chosenKingdomId !== undefined && (region as any).stateId === chosenKingdomId;
+              const isSelected = selectedRegion === region.id || isChosenKingdom;
               const isTarget = targetRegion === region.id;
-              const isNeighbor = selectedNeighbors.has(region.id);
+              const isNeighbor = !isPickingRealm && selectedNeighbors.has(region.id);
               const isConquered = animatingConquest === region.id;
               const isRepelled = animatingBattle === region.id;
               const fillColor = getRegionColor(region.id);
@@ -669,7 +676,9 @@ export const MapView: React.FC<MapViewProps> = ({
                     }
                     style={{ transition: 'fill 0.35s ease' }}
                     stroke={
-                      isSelected
+                      isChosenKingdom
+                        ? '#fae19c'
+                        : isSelected
                         ? '#d9a43a'
                         : isTarget
                         ? '#b3554f'
@@ -679,7 +688,7 @@ export const MapView: React.FC<MapViewProps> = ({
                         ? '#221910'
                         : '#1a140d'
                     }
-                    strokeWidth={isSelected || isTarget ? 3.5 : isNeighbor ? 2.5 : 1.4}
+                    strokeWidth={isChosenKingdom ? 3.2 : (isSelected || isTarget ? 3.5 : isNeighbor ? 2.5 : 1.4)}
                     strokeDasharray={isNeighbor && !isSelected && !isTarget ? '4 3' : undefined}
                     className={`region-path ${isSelected ? 'selected' : ''} ${
                       isNeighbor ? 'neighbor-selectable' : ''
@@ -687,7 +696,15 @@ export const MapView: React.FC<MapViewProps> = ({
                     onClick={(e) => {
                       if (!hasMoved.current) {
                         e.stopPropagation();
-                        onSelectRegion(region.id);
+                        if (isPickingRealm && onSelectKingdom) {
+                          const sId = (region as any).stateId;
+                          if (sId !== undefined) {
+                            haptics.light();
+                            onSelectKingdom(sId);
+                          }
+                        } else {
+                          onSelectRegion(region.id);
+                        }
                       }
                     }}
                     data-region={region.id}

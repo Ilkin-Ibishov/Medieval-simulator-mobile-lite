@@ -4,8 +4,6 @@ import { sounds } from './sound';
 import { haptics } from './haptics';
 import { loadSettings, saveSettings, applySettings, Settings } from './settings';
 
-import { DOZIA_PROVINCES } from '../data/maps/dozia_native_provinces';
-
 export type GameMode = 'CAMPAIGN' | 'SKIRMISH';
 
 export interface GameSettings {
@@ -21,6 +19,7 @@ interface LobbyProps {
   hasSavedGame?: boolean;
   onResumeGame?: () => void;
   onStartGame: (settings: GameSettings) => void;
+  onOpenRealmPicker: () => void;
   onOpenMultiplayerModal: () => void;
   onOpenMockup?: () => void;
 }
@@ -29,35 +28,13 @@ export const Lobby: React.FC<LobbyProps> = ({
   hasSavedGame,
   onResumeGame,
   onStartGame,
+  onOpenRealmPicker,
   onOpenMultiplayerModal,
   onOpenMockup,
 }) => {
   const [regionCount, setRegionCount] = useState<number>(24);
   const [playerCount, setPlayerCount] = useState<number>(4);
   const [seed, setSeed] = useState<number>(() => Math.floor(Math.random() * 99999) + 1);
-
-  // Discover kingdoms in Dozia for campaign selector
-  const kingdoms = React.useMemo(() => {
-    const map = new Map<number, { id: number; name: string; color: string; count: number; capital: string }>();
-    for (const p of DOZIA_PROVINCES) {
-      if (!map.has(p.stateId)) {
-        map.set(p.stateId, {
-          id: p.stateId,
-          name: p.stateName,
-          color: p.stateColor,
-          count: 1,
-          capital: p.isCapital ? p.name : '',
-        });
-      } else {
-        const item = map.get(p.stateId)!;
-        item.count++;
-        if (p.isCapital) item.capital = p.name;
-      }
-    }
-    return Array.from(map.values()).sort((a, b) => b.count - a.count);
-  }, []);
-
-  const [chosenKingdomId, setChosenKingdomId] = useState<number>(() => kingdoms[0]?.id || 1);
 
   const [settings, setSettings] = useState<Settings>(() => {
     const s = loadSettings();
@@ -69,20 +46,6 @@ export const Lobby: React.FC<LobbyProps> = ({
     sounds.playClick();
     haptics.light();
     setSeed(Math.floor(Math.random() * 99999) + 1);
-  };
-
-  const handleStartCampaign = () => {
-    sounds.playClick();
-    sounds.playMarch();
-    haptics.heavy();
-    onStartGame({
-      mode: 'CAMPAIGN',
-      chosenKingdomId,
-      regionCount: 117,
-      playerCount: kingdoms.length,
-      seed,
-      maxTurns: 60,
-    });
   };
 
   const handleStartSkirmish = () => {
@@ -109,8 +72,6 @@ export const Lobby: React.FC<LobbyProps> = ({
     if (patch.sound === true) sounds.playClick();
     if (patch.haptics === true) haptics.medium();
   };
-
-  const selectedKingdom = kingdoms.find((k) => k.id === chosenKingdomId) || kingdoms[0];
 
   return (
     <div className="lobby-container">
@@ -154,70 +115,19 @@ export const Lobby: React.FC<LobbyProps> = ({
             </span>
           </div>
           <p className="card-description">
-            117 nativ əyalət və 10 tarixi krallıqla böyük qitə fəthi. Krallığını seç və bütün Dozianı birləşdir!
+            117 nativ əyalət və 10 tarixi krallıqla böyük qitə fəthi. Xəritəni canlı kəşf edərək hökmranlıq edəcəyin krallığı seç!
           </p>
-
-          <div className="lobby-controls" style={{ marginTop: 12 }}>
-            <div className="control-group">
-              <label className="control-label">Hökmranlıq Edəcəyin Krallıq:</label>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: 8,
-                  marginTop: 6,
-                }}
-              >
-                {kingdoms.map((k) => {
-                  const isSel = k.id === chosenKingdomId;
-                  return (
-                    <button
-                      key={k.id}
-                      onClick={() => {
-                        setChosenKingdomId(k.id);
-                        haptics.light();
-                      }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 8,
-                        padding: '8px 10px',
-                        background: isSel ? 'rgba(217, 164, 58, 0.25)' : 'rgba(29, 23, 16, 0.6)',
-                        border: `1.5px solid ${isSel ? '#d9a43a' : 'rgba(107, 95, 69, 0.4)'}`,
-                        borderRadius: 6,
-                        color: isSel ? '#fae19c' : '#c9bda8',
-                        cursor: 'pointer',
-                        fontSize: 12,
-                        textAlign: 'left',
-                      }}
-                    >
-                      <span
-                        style={{
-                          width: 12,
-                          height: 12,
-                          borderRadius: '50%',
-                          background: k.color,
-                          boxShadow: `0 0 6px ${k.color}`,
-                          flexShrink: 0,
-                        }}
-                      />
-                      <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        <div style={{ fontWeight: isSel ? 'bold' : 'normal' }}>{k.name}</div>
-                        <div style={{ fontSize: 10, opacity: 0.7 }}>{k.count} Əyalət</div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
 
           <button
             className="btn btn-gold btn-block"
-            onClick={handleStartCampaign}
+            onClick={() => {
+              sounds.playClick();
+              haptics.medium();
+              onOpenRealmPicker();
+            }}
             style={{ marginTop: 14, padding: '14px 16px', fontSize: 16 }}
           >
-            👑 {selectedKingdom?.name} ilə Kampaniyaya Başla
+            🗺️ Xəritədən Krallıq Seç və Fəthə Başla ➔
           </button>
         </div>
 

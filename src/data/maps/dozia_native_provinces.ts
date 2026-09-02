@@ -18,11 +18,125 @@ export interface NativeProvince {
   income: number;
 }
 
+export interface KingdomMetadata {
+  stateId: number;
+  name: string;
+  color: string;
+  capitalName: string;
+  tagline: string;
+  description: string;
+  difficulty: 'ASAN' | 'ORTA' | 'ÇƏTİN';
+  trait: string;
+}
+
 export const DOZIA_MAP_METADATA = {
   name: "Dozia (117 Connected Native Provinces)",
   width: 1536,
   height: 730,
   provincesCount: 117,
+};
+
+export const DOZIA_KINGDOMS_METADATA: Record<number, KingdomMetadata> = {
+  1: {
+    stateId: 1,
+    name: 'Tamcauyenia',
+    color: '#66c2a5',
+    capitalName: 'Lai Hop',
+    tagline: 'Şərq Dağlıqları & Sərhəd Qalası',
+    description: 'Şərq dağ silsilələrində möhkəmlənmiş, dənizə çıxışı olan müdafiə krallığı.',
+    difficulty: 'ORTA',
+    trait: '🏔️ Dağ Sərhədləri',
+  },
+  2: {
+    stateId: 2,
+    name: 'Gaudinia',
+    color: '#8da0cb',
+    capitalName: 'Nardhaga',
+    tagline: 'Cənub Yarımadası & Qala Şəbəkəsi',
+    description: 'Dozianın cənub burnunu tutan, dar boğazlarla qorunan güclü knyazlıq.',
+    difficulty: 'ASAN',
+    trait: '🛡️ Təbii Boğazlar',
+  },
+  3: {
+    stateId: 3,
+    name: 'Kitawana',
+    color: '#a6d854',
+    capitalName: 'Kitawana',
+    tagline: 'Şimal-Şərq Meşələri',
+    description: 'Zəngin meşəliklərlə əhatə olunmuş, qonşularına qarşı sürətli basqınlar təşkil edən krallıq.',
+    difficulty: 'ÇƏTİN',
+    trait: '🌲 Meşə Pusquları',
+  },
+  4: {
+    stateId: 4,
+    name: 'Yanan Guo',
+    color: '#e5c494',
+    capitalName: 'Fuatong',
+    tagline: 'Şərq Düzənlikləri & Döyüş Meydanı',
+    description: 'Dozianın mərkəz-şərq düzənliklərində 4 tərəfdən sərhədi olan qızğın müharibə meydanı.',
+    difficulty: 'ÇƏTİN',
+    trait: '⚔️ Qaynar Qazan',
+  },
+  5: {
+    stateId: 5,
+    name: 'Phoia',
+    color: '#fc8d62',
+    capitalName: 'Anvar',
+    tagline: 'Cənub-Şərq Sahil Hersoqluğu',
+    description: 'Cənub-şərq buxtasında yerləşən, zəngin ticarət yollarına nəzarət edən cəsur hersoqluq.',
+    difficulty: 'ORTA',
+    trait: '⚓ Sahil Ticarəti',
+  },
+  6: {
+    stateId: 6,
+    name: 'Toki',
+    color: '#ffd92f',
+    capitalName: 'Toki',
+    tagline: 'Şimal Yarımadası & Sıldırım Qayalıqlar',
+    description: 'Şimalın ucqar yarımadasında yerləşən kompakt və tək cəbhəli dövlət.',
+    difficulty: 'ORTA',
+    trait: '⚡ Tək Cəbhəli Sərhəd',
+  },
+  7: {
+    stateId: 7,
+    name: 'Samtsuenia',
+    color: '#1f78b4',
+    capitalName: 'Samtsaung',
+    tagline: 'Şimal-Qərb Limanları',
+    description: 'Şimal-qərb sahillərində yerləşən, dəniz və quru keçidlərinə hakim liman dövləti.',
+    difficulty: 'ORTA',
+    trait: '🌊 Liman Qüvvəsi',
+  },
+  8: {
+    stateId: 8,
+    name: 'Mamatihalia',
+    color: '#33a02c',
+    capitalName: 'Huangtian',
+    tagline: 'Böyük Qitə İmperiyası & Mərkəzi Hakimiyyət',
+    description: 'Dozianın ən böyük ərazisinə malik hegemon imperiyası. Nəhəng gəlir və geniş sərhədlər.',
+    difficulty: 'ASAN',
+    trait: '🌟 Nəhəng İqtisadiyyat',
+  },
+  9: {
+    stateId: 9,
+    name: 'Kyokoge',
+    color: '#e78ac3',
+    capitalName: 'Kyokoge',
+    tagline: 'Şərq Dəniz Adası & Təcrid Olunmuş Qala',
+    description: 'Dəniz yolları ilə qorunan böyük ada imperiyası. İşğalçılar üçün aşılmaz təbii baryer.',
+    difficulty: 'ASAN',
+    trait: '🏝️ Ada Qorunması',
+  },
+  10: {
+    stateId: 10,
+    name: 'Qin Guo',
+    color: '#b3b3b3',
+    capitalName: 'Turkbeli',
+    tagline: 'Şimal Qüdrəti & Dəmir Qvardiya',
+    description: 'Şimalın ən güclü hərbi maşını. Güclü qarnizonları və strateji keçidləri ilə fateh xalq.',
+    difficulty: 'ASAN',
+    trait: '👑 Dəmir İntizam',
+  },
 };
 
 export const DOZIA_PROVINCES: NativeProvince[] = [
