@@ -11,6 +11,8 @@ import {
   calculatePlayerUpkeep,
   previewCombat,
   getReadyTroops,
+  hasActivePact,
+  canProposePact,
 } from '../core/rules';
 
 export { type BotPersonality };
@@ -22,12 +24,6 @@ export { type BotPersonality };
 export const BOT_CONFIG = {
   /**
    * Troops a bot always leaves behind in a region that borders someone else.
-   *
-   * Measured before this existed: 92% of all bot attacks were against a region holding
-   * ZERO troops, 85% of attacks emptied their own source region, and 13.7 of 24 regions
-   * sat empty at any moment. The bots marched their whole garrison forward every turn and
-   * left a trail of free real estate behind them, which the enemy simply walked into.
-   * That — not the combat maths — was the engine behind ~490 ownership flips per game.
    */
   borderGarrison: 4,
 };
@@ -62,7 +58,6 @@ export function computeBotActions(
   if (ownedRegions.length === 0) return [{ type: 'END_TURN' }];
 
   // 1. First: Evaluate Strategic Recruitment (Hiring)
-  // Calculate projected income vs upkeep
   const projectedIncome = calculatePlayerIncome(state, botId);
   const currentUpkeep = calculatePlayerUpkeep(state, botId);
   const currentMargin = projectedIncome - currentUpkeep;
@@ -139,12 +134,39 @@ export function computeBotActions(
     }
   }
 
-  // A region only needs a garrison if it actually touches someone else. Purely interior
-  // regions cannot be attacked directly, so emptying those is free.
+  // 1.8. Evaluate Diplomatic Pacts (Secure a quiet flank when under pressure)
+  if (virtualTreasury >= RULES.pactCost) {
+    const neighborKingdoms = new Set<PlayerId>();
+    for (const r of ownedRegions) {
+      for (const n of state.map.regions[r].neighbors) {
+        const o = state.regionState[n]?.owner;
+        if (o >= 0 && o !== botId && state.players[o]?.isAlive) {
+          neighborKingdoms.add(o);
+        }
+      }
+    }
+
+    if (neighborKingdoms.size >= 2) {
+      // Fighting on 2+ fronts: try to secure peace with one neighbor
+      for (const targetKid of neighborKingdoms) {
+        if (!hasActivePact(state, botId, targetKid)) {
+          const propCheck = canProposePact(state, botId, targetKid);
+          if (propCheck.allowed && propCheck.acceptScore >= 50) {
+            actions.push({
+              type: 'PROPOSE_PACT',
+              targetPlayer: targetKid,
+            });
+            virtualTreasury -= RULES.pactCost;
+            break;
+          }
+        }
+      }
+    }
+  }
+
   const isBorder = (r: number): boolean =>
     state.map.regions[r].neighbors.some((n) => state.regionState[n].owner !== botId);
 
-  // Aggressive bots maintain slightly lower border garrisons to push more forward; capitals keep +1 reserve
   const committableTroops = (r: number): number => {
     const ready = getReadyTroops(state, r);
     if (!isBorder(r)) return ready;
@@ -158,13 +180,12 @@ export function computeBotActions(
     return Math.max(0, ready - reserve);
   };
 
-  // 2. Interior and Border Troop Relocation (Concentrate ready pre-existing forces)
+  // 2. Interior and Border Troop Relocation
   const availableTroops = new Map<number, number>();
   for (const r of ownedRegions) {
     availableTroops.set(r, committableTroops(r));
   }
 
-  // First: Move troops from interior or quiet borders to active frontline
   for (const r of ownedRegions) {
     let curr = availableTroops.get(r) || 0;
     if (curr <= 0) continue;
@@ -173,7 +194,6 @@ export function computeBotActions(
     const hasEnemyNeighbor = isBorder(r);
 
     if (!hasEnemyNeighbor && curr > 0) {
-      // Find neighboring friendly region closest to enemies (or closest to lost capital)
       const frontlineNeighbor = neighbors.find((n) =>
         isCapitalLost
           ? n === player.capital || state.map.regions[n].neighbors.includes(player.capital)
@@ -188,7 +208,6 @@ export function computeBotActions(
           count: curr,
         });
         availableTroops.set(r, 0);
-        // Note: moved troops cannot move again this turn (exhaustion)
       }
     }
   }
@@ -199,7 +218,6 @@ export function computeBotActions(
     if (currAvailable <= 0) continue;
 
     const neighbors = state.map.regions[from].neighbors;
-    // Prioritize own lost capital, then enemy capitals, then weak enemy/neutral regions
     const sortedNeighbors = [...neighbors].sort((a, b) => {
       const isOwnCapA = a === player.capital;
       const isOwnCapB = b === player.capital;
@@ -216,7 +234,6 @@ export function computeBotActions(
       const aTroops = state.regionState[a].troops;
       const bTroops = state.regionState[b].troops;
 
-      // Prefer enemy/neutral over friendly
       if (aOwner !== botId && bOwner === botId) return -1;
       if (bOwner !== botId && aOwner === botId) return 1;
       return aTroops - bTroops;
@@ -224,7 +241,12 @@ export function computeBotActions(
 
     for (const to of sortedNeighbors) {
       const targetState = state.regionState[to];
-      if (targetState.owner === botId) continue; // Skip friendly
+      if (targetState.owner === botId) continue;
+
+      // Respect active Non-Aggression Pacts
+      if (targetState.owner >= 0 && hasActivePact(state, botId, targetState.owner)) {
+        continue;
+      }
 
       const preview = previewCombat(currAvailable, targetState.troops);
       if (preview.willWin && preview.attackerSurviving >= 1) {

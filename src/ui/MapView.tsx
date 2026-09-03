@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { GameState, Region } from '../core/types';
-import { getRegionVisibility } from '../core';
+import { getRegionVisibility, hasActivePact } from '../core';
 import { haptics } from './haptics';
 import type { Floater } from './App';
 
@@ -658,8 +658,9 @@ export const MapView: React.FC<MapViewProps> = ({
               const isConquered = animatingConquest === region.id;
               const isRepelled = animatingBattle === region.id;
               const fillColor = getRegionColor(region.id);
-
               const pathD = regionPathsMap.get(region.id) || polygonToPath(region);
+              const rState = gameState.regionState[region.id];
+              const isAlly = !isPickingRealm && rState?.owner !== undefined && rState.owner >= 0 && rState.owner !== gameState.activePlayer && hasActivePact(gameState, gameState.activePlayer, rState.owner);
 
               return (
                 <React.Fragment key={region.id}>
@@ -682,17 +683,19 @@ export const MapView: React.FC<MapViewProps> = ({
                         ? '#d9a43a'
                         : isTarget
                         ? '#b3554f'
+                        : isAlly
+                        ? '#4ade80'
                         : isNeighbor
                         ? '#5f7a68'
                         : isFogged
                         ? '#221910'
                         : '#1a140d'
                     }
-                    strokeWidth={isChosenKingdom ? 3.2 : (isSelected || isTarget ? 3.5 : isNeighbor ? 2.5 : 1.4)}
-                    strokeDasharray={isNeighbor && !isSelected && !isTarget ? '4 3' : undefined}
+                    strokeWidth={isChosenKingdom ? 3.2 : (isSelected || isTarget ? 3.5 : isAlly ? 2.8 : isNeighbor ? 2.5 : 1.4)}
+                    strokeDasharray={isAlly ? '6 4' : (isNeighbor && !isSelected && !isTarget ? '4 3' : undefined)}
                     className={`region-path ${isSelected ? 'selected' : ''} ${
                       isNeighbor ? 'neighbor-selectable' : ''
-                    } ${isConquered ? 'conquest-pulse' : ''} ${isRepelled ? 'battle-repel-pulse' : ''}`}
+                    } ${isAlly ? 'pact-ally-border' : ''} ${isConquered ? 'conquest-pulse' : ''} ${isRepelled ? 'battle-repel-pulse' : ''}`}
                     onClick={(e) => {
                       if (!hasMoved.current) {
                         e.stopPropagation();

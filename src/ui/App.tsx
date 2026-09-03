@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { GameState, Action, createGame, resolveRound, RoundOrders, getDoziaMapData } from '../core';
+import { GameState, Action, PlayerId, createGame, applyAction, resolveRound, RoundOrders, getDoziaMapData } from '../core';
 import { computeBotActions } from '../ai/bot';
 import { calculateNetGold } from '../core/rules';
 import { Lobby, GameSettings } from './Lobby';
@@ -10,6 +10,7 @@ import { GameOverModal } from './GameOverModal';
 import { MultiplayerModal } from './MultiplayerModal';
 import { ExitConfirmModal } from './ExitConfirmModal';
 import { MockupView } from './MockupView';
+import { DiplomacyModal } from './DiplomacyModal';
 import { CoinIcon } from './Icons';
 import { sounds } from './sound';
 import { haptics } from './haptics';
@@ -58,6 +59,7 @@ export const App: React.FC = () => {
 
   // Modals
   const [isTurnReportOpen, setIsTurnReportOpen] = useState<boolean>(false);
+  const [isDiplomacyOpen, setIsDiplomacyOpen] = useState<boolean>(false);
   const [isMultiplayerModalOpen, setIsMultiplayerModalOpen] = useState<boolean>(false);
   const [isExitConfirmOpen, setIsExitConfirmOpen] = useState<boolean>(false);
   const [isMockupOpen, setIsMockupOpen] = useState<boolean>(() => window.location.hash === '#mockup');
@@ -168,6 +170,10 @@ export const App: React.FC = () => {
     }
     if (isTurnReportOpen) {
       setIsTurnReportOpen(false);
+      return true;
+    }
+    if (isDiplomacyOpen) {
+      setIsDiplomacyOpen(false);
       return true;
     }
     if (targetRegion !== null) {
@@ -393,6 +399,25 @@ export const App: React.FC = () => {
         }
       }
     }
+  };
+
+  // Diplomacy action handlers
+  const handleProposePact = (targetPlayer: PlayerId) => {
+    if (!gameState) return;
+    const next = applyAction(gameState, { type: 'PROPOSE_PACT', targetPlayer });
+    setGameState(next);
+  };
+
+  const handleSendTribute = (targetPlayer: PlayerId) => {
+    if (!gameState) return;
+    const next = applyAction(gameState, { type: 'SEND_TRIBUTE', targetPlayer });
+    setGameState(next);
+  };
+
+  const handleBreakPact = (targetPlayer: PlayerId) => {
+    if (!gameState) return;
+    const next = applyAction(gameState, { type: 'BREAK_PACT', targetPlayer });
+    setGameState(next);
   };
 
   // Discover kingdom stats for realm picker
@@ -623,6 +648,20 @@ export const App: React.FC = () => {
           </div>
 
           <button
+            className="btn btn-secondary btn-pill btn-diplomacy"
+            onClick={() => {
+              sounds.playClick();
+              haptics.light();
+              setIsDiplomacyOpen(true);
+            }}
+            title="Diplomatiya və Paktlar"
+            aria-label="Diplomatiya və Paktlar"
+          >
+            <span aria-hidden="true">🤝</span>
+            <span className="btn-report-label">Paktlar</span>
+          </button>
+
+          <button
             className="btn btn-secondary btn-pill btn-report"
             onClick={() => setIsTurnReportOpen(true)}
             title="Hesabat"
@@ -719,6 +758,18 @@ export const App: React.FC = () => {
         <TurnReport
           gameState={gameState}
           onClose={() => setIsTurnReportOpen(false)}
+        />
+      )}
+
+      {/* Diplomacy & Pacts Modal */}
+      {isDiplomacyOpen && (
+        <DiplomacyModal
+          gameState={gameState}
+          isOpen={isDiplomacyOpen}
+          onClose={() => setIsDiplomacyOpen(false)}
+          onProposePact={handleProposePact}
+          onSendTribute={handleSendTribute}
+          onBreakPact={handleBreakPact}
         />
       )}
 

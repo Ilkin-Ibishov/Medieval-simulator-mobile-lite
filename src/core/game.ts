@@ -15,6 +15,9 @@ import {
   calculatePlayerIncome,
   calculatePlayerUpkeep,
   getOwnedRegionCount,
+  getDiplomacyKey,
+  canProposePact,
+  hasActivePact,
 } from './rules';
 
 export interface CreateGameOptions {
@@ -275,6 +278,7 @@ export function createGame(options: CreateGameOptions): GameState {
     winner: null,
     events: [],
     fogOfWar: options.fogOfWar ?? true,
+    diplomacy: {},
   };
 }
 
@@ -291,6 +295,8 @@ export function cloneGameState(state: GameState): GameState {
     winner: state.winner,
     events: [...state.events],
     fogOfWar: state.fogOfWar,
+    scenario: state.scenario,
+    diplomacy: state.diplomacy ? { ...state.diplomacy } : {},
   };
 }
 
@@ -351,6 +357,73 @@ export function applyAction(prevState: GameState, action: Action): GameState {
       break;
     }
 
+    case 'PROPOSE_PACT': {
+      const target = next.players[action.targetPlayer];
+      if (!target || !target.isAlive) break;
+      player.treasury -= RULES.pactCost;
+      const key = getDiplomacyKey(currentActive, action.targetPlayer);
+      if (!next.diplomacy) next.diplomacy = {};
+
+      const check = canProposePact(prevState, currentActive, action.targetPlayer);
+      const isAccepted = !target.isAi || check.acceptScore >= 50;
+
+      if (isAccepted) {
+        next.diplomacy[key] = {
+          status: 'PACT',
+          pactTurnsRemaining: RULES.pactDuration,
+          cooldownTurnsRemaining: 0,
+        };
+        next.events.push({
+          turn: next.turn,
+          playerId: currentActive,
+          type: 'PACT_FORMED',
+          description: `🤝 ${player.name} və ${target.name} arasında 3-turnlük Qeyri-Hücum Paktı bağlandı!`,
+        });
+      } else {
+        next.events.push({
+          turn: next.turn,
+          playerId: currentActive,
+          type: 'BATTLE',
+          description: `📜 ${target.name} ${player.name} tərəfindən göndərilən pakt təklifini rədd etdi.`,
+        });
+      }
+      break;
+    }
+
+    case 'SEND_TRIBUTE': {
+      const target = next.players[action.targetPlayer];
+      if (!target || !target.isAlive) break;
+      player.treasury -= RULES.tributeCost;
+      target.treasury += RULES.tributeCost;
+      next.events.push({
+        turn: next.turn,
+        playerId: currentActive,
+        type: 'TRIBUTE_SENT',
+        description: `💰 ${player.name} ${target.name} xəzinəsinə ${RULES.tributeCost}G töhfə göndərdi!`,
+      });
+      break;
+    }
+
+    case 'BREAK_PACT': {
+      const target = next.players[action.targetPlayer];
+      if (!target) break;
+      const key = getDiplomacyKey(currentActive, action.targetPlayer);
+      if (!next.diplomacy) next.diplomacy = {};
+      next.diplomacy[key] = {
+        status: 'COOLDOWN',
+        pactTurnsRemaining: 0,
+        cooldownTurnsRemaining: RULES.pactCooldown * 2,
+      };
+      player.treasury = Math.max(0, player.treasury - RULES.betrayalPenalty);
+      next.events.push({
+        turn: next.turn,
+        playerId: currentActive,
+        type: 'PACT_BROKEN',
+        description: `⚡ XƏYANƏT: ${player.name} ${target.name} ilə olan paktı vaxtından əvvəl pozdu! (-${RULES.betrayalPenalty}G cərimə)`,
+      });
+      break;
+    }
+
     case 'MOVE': {
       const fromReg = next.regionState[action.from];
       const toReg = next.regionState[action.to];
@@ -362,6 +435,24 @@ export function applyAction(prevState: GameState, action: Action): GameState {
         toReg.troops += action.count;
         toReg.exhaustedTroops = (toReg.exhaustedTroops || 0) + action.count;
       } else {
+        // Check if attacking an active pact partner (Treason)
+        if (toReg.owner >= 0 && hasActivePact(next, currentActive, toReg.owner)) {
+          const key = getDiplomacyKey(currentActive, toReg.owner);
+          if (!next.diplomacy) next.diplomacy = {};
+          next.diplomacy[key] = {
+            status: 'COOLDOWN',
+            pactTurnsRemaining: 0,
+            cooldownTurnsRemaining: RULES.pactCooldown * 2,
+          };
+          player.treasury = Math.max(0, player.treasury - RULES.betrayalPenalty);
+          next.events.push({
+            turn: next.turn,
+            playerId: currentActive,
+            type: 'PACT_BROKEN',
+            description: `⚡ XƏYANƏT HÜCUMU: ${player.name} paktı pozaraq ${next.players[toReg.owner].name} torpaqlarına basqın etdi! (-${RULES.betrayalPenalty}G cərimə)`,
+          });
+        }
+
         // Battle / Attack!
         const defenderOwner = toReg.owner;
         const targetRegion = next.map.regions[action.to];
@@ -518,6 +609,32 @@ export function applyAction(prevState: GameState, action: Action): GameState {
             }
           }
         }
+
+        // Process diplomacy counters
+        if (next.diplomacy) {
+          for (const key of Object.keys(next.diplomacy)) {
+            const rel = next.diplomacy[key];
+            if (rel.status === 'PACT') {
+              rel.pactTurnsRemaining--;
+              if (rel.pactTurnsRemaining <= 0) {
+                rel.status = 'COOLDOWN';
+                rel.cooldownTurnsRemaining = RULES.pactCooldown;
+                next.events.push({
+                  turn: next.turn,
+                  playerId: 0,
+                  type: 'PACT_EXPIRED',
+                  description: `⌛ Pakt Müddəti Bitdi: Dövlətlər arasındakı sülh müqaviləsi başa çatdı.`,
+                });
+              }
+            } else if (rel.status === 'COOLDOWN') {
+              rel.cooldownTurnsRemaining--;
+              if (rel.cooldownTurnsRemaining <= 0) {
+                rel.status = 'WAR';
+              }
+            }
+          }
+        }
+
         next.turn++;
       }
 

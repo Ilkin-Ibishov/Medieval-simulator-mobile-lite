@@ -160,6 +160,19 @@ export function canApplyAction(state: GameState, action: Action, playerId: Playe
       if (!reg || reg.owner !== playerId) return false;
       return reg.troops >= action.count;
     }
+    case 'PROPOSE_PACT': {
+      const res = canProposePact(state, playerId, action.targetPlayer);
+      return res.allowed;
+    }
+    case 'SEND_TRIBUTE': {
+      const res = canSendTribute(state, playerId, action.targetPlayer);
+      return res.allowed;
+    }
+    case 'BREAK_PACT': {
+      if (action.targetPlayer === playerId) return false;
+      const rel = getDiplomaticRelation(state, playerId, action.targetPlayer);
+      return rel.status === 'PACT';
+    }
     case 'END_TURN':
       return true;
   }
@@ -210,6 +223,18 @@ export function getLegalActions(state: GameState, playerId: PlayerId): Action[] 
           if (ready > 2) {
             actions.push({ type: 'MOVE', from, to, count: Math.floor(ready / 2) });
           }
+        }
+      }
+    }
+  }
+
+  // 4. Diplomatic Actions
+  if (player.treasury >= RULES.pactCost) {
+    for (const other of state.players) {
+      if (other.id !== playerId && other.isAlive) {
+        const check = canProposePact(state, playerId, other.id);
+        if (check.allowed) {
+          actions.push({ type: 'PROPOSE_PACT', targetPlayer: other.id });
         }
       }
     }
@@ -276,4 +301,134 @@ export function isRegionDiscovered(
 ): boolean {
   const vis = getRegionVisibility(state, viewerPlayerId, regionId);
   return vis === 'VISIBLE' || vis === 'BORDER';
+}
+
+/**
+ * Standard symmetric key for indexing diplomacy between any pair of players.
+ */
+export function getDiplomacyKey(pA: PlayerId, pB: PlayerId): string {
+  return pA < pB ? `${pA}-${pB}` : `${pB}-${pA}`;
+}
+
+/**
+ * Retrieves the diplomatic relation between two players. Defaults to WAR (neutral/hostile).
+ */
+export function getDiplomaticRelation(
+  state: GameState,
+  pA: PlayerId,
+  pB: PlayerId
+): import('./types').DiplomaticRelation {
+  if (pA === pB) {
+    return { status: 'PACT', pactTurnsRemaining: 999, cooldownTurnsRemaining: 0 };
+  }
+  const key = getDiplomacyKey(pA, pB);
+  if (state.diplomacy && state.diplomacy[key]) {
+    return state.diplomacy[key];
+  }
+  return { status: 'WAR', pactTurnsRemaining: 0, cooldownTurnsRemaining: 0 };
+}
+
+/**
+ * Returns true if two players have an active, unbroken Non-Aggression Pact.
+ */
+export function hasActivePact(state: GameState, pA: PlayerId, pB: PlayerId): boolean {
+  if (pA === pB) return true;
+  const rel = getDiplomaticRelation(state, pA, pB);
+  return rel.status === 'PACT' && rel.pactTurnsRemaining > 0;
+}
+
+/**
+ * Calculates whether a player can propose a Non-Aggression Pact to another player.
+ */
+export function canProposePact(
+  state: GameState,
+  fromPlayer: PlayerId,
+  toPlayer: PlayerId
+): { allowed: boolean; reason?: string; acceptScore: number; acceptChancePercent: number } {
+  if (fromPlayer === toPlayer) {
+    return { allowed: false, reason: 'Özünlə pakt bağlaya bilməzsən', acceptScore: 0, acceptChancePercent: 0 };
+  }
+  const sender = state.players[fromPlayer];
+  const target = state.players[toPlayer];
+  if (!sender || !target || !sender.isAlive || !target.isAlive) {
+    return { allowed: false, reason: 'Dövlət mövcud deyil və ya süqut edib', acceptScore: 0, acceptChancePercent: 0 };
+  }
+
+  if (sender.treasury < RULES.pactCost) {
+    return { allowed: false, reason: `Yetərli qızıl yoxdur (${RULES.pactCost}G tələb olunur)`, acceptScore: 0, acceptChancePercent: 0 };
+  }
+
+  const rel = getDiplomaticRelation(state, fromPlayer, toPlayer);
+  if (rel.status === 'PACT') {
+    return { allowed: false, reason: `Artıq aktiv pakt mövcuddur (${rel.pactTurnsRemaining} turn qalıb)`, acceptScore: 100, acceptChancePercent: 100 };
+  }
+  if (rel.cooldownTurnsRemaining > 0) {
+    return { allowed: false, reason: `Soyuma müddəti aktivdir (${rel.cooldownTurnsRemaining} turn qalıb)`, acceptScore: 0, acceptChancePercent: 0 };
+  }
+
+  // Calculate deterministic AI acceptance score (0..100)
+  const fromTroops = calculatePlayerTroopCount(state, fromPlayer);
+  const targetTroops = calculatePlayerTroopCount(state, toPlayer);
+
+  let score = 50; // Base willingness
+
+  // Relative power: if sender is militarily formidable, target is more eager for peace
+  if (fromTroops >= targetTroops * 1.3) {
+    score += 25;
+  } else if (fromTroops >= targetTroops) {
+    score += 15;
+  } else if (targetTroops >= fromTroops * 1.5) {
+    score -= 20; // Target feels strong and ambitious
+  }
+
+  // Border contact check
+  let sharesBorder = false;
+  for (let r = 0; r < state.regionState.length; r++) {
+    if (state.regionState[r].owner === fromPlayer) {
+      const neighbors = state.map.regions[r]?.neighbors || [];
+      for (const n of neighbors) {
+        if (state.regionState[n]?.owner === toPlayer) {
+          sharesBorder = true;
+          break;
+        }
+      }
+      if (sharesBorder) break;
+    }
+  }
+
+  if (sharesBorder) {
+    score += 15; // Frontier security is valuable
+  } else {
+    score -= 15; // No shared border, low diplomatic urgency
+  }
+
+  const finalScore = Math.max(10, Math.min(95, score));
+
+  return {
+    allowed: true,
+    acceptScore: finalScore,
+    acceptChancePercent: finalScore,
+  };
+}
+
+/**
+ * Calculates whether a player can send a gold tribute to another player.
+ */
+export function canSendTribute(
+  state: GameState,
+  fromPlayer: PlayerId,
+  toPlayer: PlayerId
+): { allowed: boolean; reason?: string } {
+  if (fromPlayer === toPlayer) {
+    return { allowed: false, reason: 'Özünə töhfə göndərə bilməzsən' };
+  }
+  const sender = state.players[fromPlayer];
+  const target = state.players[toPlayer];
+  if (!sender || !target || !sender.isAlive || !target.isAlive) {
+    return { allowed: false, reason: 'Dövlət mövcud deyil və ya süqut edib' };
+  }
+  if (sender.treasury < RULES.tributeCost) {
+    return { allowed: false, reason: `Yetərli qızıl yoxdur (${RULES.tributeCost}G tələb olunur)` };
+  }
+  return { allowed: true };
 }

@@ -62,7 +62,7 @@ export interface MapData {
 export interface TurnEvent {
   turn: number;
   playerId: PlayerId;
-  type: 'BATTLE' | 'CONQUEST' | 'BANKRUPTCY' | 'ELIMINATION';
+  type: 'BATTLE' | 'CONQUEST' | 'BANKRUPTCY' | 'ELIMINATION' | 'PACT_FORMED' | 'PACT_EXPIRED' | 'PACT_BROKEN' | 'TRIBUTE_SENT';
   description: string;
   fromRegion?: number;
   toRegion?: number;
@@ -74,6 +74,14 @@ export interface TurnEvent {
 export type VisibilityLevel = 'VISIBLE' | 'BORDER' | 'FOGGED';
 
 export type CampaignScenario = 'HEGEMONY' | 'SHATTERED';
+
+export type DiplomaticStatus = 'WAR' | 'PACT' | 'COOLDOWN';
+
+export interface DiplomaticRelation {
+  status: DiplomaticStatus;
+  pactTurnsRemaining: number;
+  cooldownTurnsRemaining: number;
+}
 
 export interface GameState {
   seed: number;
@@ -88,6 +96,7 @@ export interface GameState {
   events: TurnEvent[];
   fogOfWar?: boolean;
   scenario?: CampaignScenario;
+  diplomacy?: Record<string, DiplomaticRelation>;
 }
 
 export type Action =
@@ -95,6 +104,9 @@ export type Action =
   | { type: 'MOVE'; from: number; to: number; count: number }
   | { type: 'BUILD'; regionId: number; building: BuildingType }
   | { type: 'DISBAND'; regionId: number; count: number }
+  | { type: 'PROPOSE_PACT'; targetPlayer: PlayerId }
+  | { type: 'SEND_TRIBUTE'; targetPlayer: PlayerId }
+  | { type: 'BREAK_PACT'; targetPlayer: PlayerId }
   | { type: 'END_TURN' };
 
 export interface BalanceRules {
@@ -126,6 +138,16 @@ export interface BalanceRules {
   fortCost: number;
   /** Qalada dayanan müdafiəçiyə verilən əlavə döyüş gücü */
   fortDefenseBonus: number;
+  /** Qeyri-hücum paktı imzalama xərci (Qızıl) */
+  pactCost: number;
+  /** Paktın qüvvədə qalma müddəti (turn) */
+  pactDuration: number;
+  /** Pakt bitdikdən sonra yenisinin bağlanması üçün gözləmə müddəti (turn) */
+  pactCooldown: number;
+  /** Qızıl töhfəsi / hədiyyəsi xərci (Qızıl) */
+  tributeCost: number;
+  /** Paktı pozub hücum edən tərəfə tətbiq olunan xəyanət cəriməsi (Qızıl) */
+  betrayalPenalty: number;
 }
 
 export interface BotPersonality {
@@ -161,6 +183,11 @@ export const RULES: BalanceRules = {
   watchtowerCost: 15,
   fortCost: 25,
   fortDefenseBonus: 2,
+  pactCost: 15,
+  pactDuration: 3,
+  pactCooldown: 3,
+  tributeCost: 10,
+  betrayalPenalty: 20,
 };
 
 export const PLAYER_PALETTES: {

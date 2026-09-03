@@ -1950,3 +1950,52 @@ body::after {
   font-weight: 800;
   border-radius: 8px;
 }
+
+/* ==========================================================================
+   Tactical Diplomacy & Pacts Styling
+   ========================================================================== */
+
+.btn-diplomacy {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(74, 222, 128, 0.35);
+  color: #86efac;
+  gap: 5px;
+}
+
+.btn-diplomacy:hover {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: #4ade80;
+}
+
+.diplomacy-modal-card {
+  width: 95%;
+  max-width: 480px;
+  background: #111827;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(34, 197, 94, 0.15);
+}
+
+.diplomacy-kingdom-card {
+  transition: all 0.2s ease;
+}
+
+.diplomacy-kingdom-card:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.kingdom-dead {
+  opacity: 0.45;
+  filter: grayscale(0.7);
+}
+
+.pact-ally-border {
+  stroke-dasharray: 6 4;
+  animation: ally-dash 20s linear infinite;
+}
+
+@keyframes ally-dash {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+

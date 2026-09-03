@@ -35,7 +35,7 @@
  *  on the turn they were bought (the existing "summoning sickness" rule is preserved).
  */
 import { GameState, PlayerId, Action, RULES } from './types';
-import { getOwnedRegionCount } from './rules';
+import { getOwnedRegionCount, getDiplomacyKey, canProposePact, hasActivePact } from './rules';
 import { cloneGameState } from './game';
 
 /** One player's submitted orders for a round. */
@@ -62,6 +62,7 @@ export function resolveRound(prevState: GameState, orders: RoundOrders): GameSta
 
   const next = cloneGameState(prevState);
   const regionCount = next.regionState.length;
+  if (!next.diplomacy) next.diplomacy = {};
 
   // Troop counts as they stood when the round began. Move orders are validated against
   // these, so newly hired troops cannot also march.
@@ -69,7 +70,7 @@ export function resolveRound(prevState: GameState, orders: RoundOrders): GameSta
 
   const livingPlayers = next.players.filter((p) => p.isAlive).map((p) => p.id);
 
-  // ---------------------------------------------------------------- Phase 1: economy
+  // ---------------------------------------------------------------- Phase 1: economy & diplomacy
   for (const pid of livingPlayers) {
     const player = next.players[pid];
     for (const action of orders[pid] ?? []) {
@@ -100,6 +101,64 @@ export function resolveRound(prevState: GameState, orders: RoundOrders): GameSta
         const count = Math.min(action.count, reg.troops);
         reg.troops -= count;
         player.treasury += Math.floor(count * (RULES.unitCost / 2));
+      } else if (action.type === 'PROPOSE_PACT') {
+        const target = next.players[action.targetPlayer];
+        if (!target || !target.isAlive) continue;
+        if (player.treasury < RULES.pactCost) continue;
+        player.treasury -= RULES.pactCost;
+
+        const check = canProposePact(prevState, pid, action.targetPlayer);
+        const isAccepted = !target.isAi || check.acceptScore >= 50;
+        const key = getDiplomacyKey(pid, action.targetPlayer);
+
+        if (isAccepted) {
+          next.diplomacy[key] = {
+            status: 'PACT',
+            pactTurnsRemaining: RULES.pactDuration,
+            cooldownTurnsRemaining: 0,
+          };
+          next.events.push({
+            turn: next.turn,
+            playerId: pid,
+            type: 'PACT_FORMED',
+            description: `🤝 ${player.name} və ${target.name} arasında 3-raundluq Qeyri-Hücum Paktı bağlandı!`,
+          });
+        } else {
+          next.events.push({
+            turn: next.turn,
+            playerId: pid,
+            type: 'BATTLE',
+            description: `📜 ${target.name} ${player.name} tərəfindən göndərilən pakt təklifini rədd etdi.`,
+          });
+        }
+      } else if (action.type === 'SEND_TRIBUTE') {
+        const target = next.players[action.targetPlayer];
+        if (!target || !target.isAlive) continue;
+        if (player.treasury < RULES.tributeCost) continue;
+        player.treasury -= RULES.tributeCost;
+        target.treasury += RULES.tributeCost;
+        next.events.push({
+          turn: next.turn,
+          playerId: pid,
+          type: 'TRIBUTE_SENT',
+          description: `💰 ${player.name} ${target.name} xəzinəsinə ${RULES.tributeCost}G töhfə göndərdi!`,
+        });
+      } else if (action.type === 'BREAK_PACT') {
+        const target = next.players[action.targetPlayer];
+        if (!target) continue;
+        const key = getDiplomacyKey(pid, action.targetPlayer);
+        next.diplomacy[key] = {
+          status: 'COOLDOWN',
+          pactTurnsRemaining: 0,
+          cooldownTurnsRemaining: RULES.pactCooldown * 2,
+        };
+        player.treasury = Math.max(0, player.treasury - RULES.betrayalPenalty);
+        next.events.push({
+          turn: next.turn,
+          playerId: pid,
+          type: 'PACT_BROKEN',
+          description: `⚡ XƏYANƏT: ${player.name} ${target.name} ilə olan paktı vaxtından əvvəl pozdu! (-${RULES.betrayalPenalty}G cərimə)`,
+        });
       }
     }
   }
@@ -150,6 +209,30 @@ export function resolveRound(prevState: GameState, orders: RoundOrders): GameSta
     for (const r of reinforcements) reg.troops += r.troops;
 
     if (attackers.length === 0) continue;
+
+    // Check if any attacker betrayed an active pact with the defender
+    if (defenderId >= 0) {
+      for (const att of attackers) {
+        if (hasActivePact(next, att.playerId, defenderId)) {
+          const key = getDiplomacyKey(att.playerId, defenderId);
+          next.diplomacy[key] = {
+            status: 'COOLDOWN',
+            pactTurnsRemaining: 0,
+            cooldownTurnsRemaining: RULES.pactCooldown * 2,
+          };
+          const betrayer = next.players[att.playerId];
+          if (betrayer) {
+            betrayer.treasury = Math.max(0, betrayer.treasury - RULES.betrayalPenalty);
+            next.events.push({
+              turn: next.turn,
+              playerId: att.playerId,
+              type: 'PACT_BROKEN',
+              description: `⚡ XƏYANƏT HÜCUMU: ${betrayer.name} paktı pozaraq ${next.players[defenderId].name} torpaqlarına basqın etdi! (-${RULES.betrayalPenalty}G cərimə)`,
+            });
+          }
+        }
+      }
+    }
 
     const garrison = reg.troops;
     const isCapitalDef = defenderId >= 0 && next.players[defenderId]?.capital === regionId;
@@ -319,6 +402,32 @@ export function resolveRound(prevState: GameState, orders: RoundOrders): GameSta
   for (let i = 0; i < regionCount; i++) {
     next.regionState[i].exhaustedTroops = 0;
   }
+
+  // Process diplomacy counters
+  if (next.diplomacy) {
+    for (const key of Object.keys(next.diplomacy)) {
+      const rel = next.diplomacy[key];
+      if (rel.status === 'PACT') {
+        rel.pactTurnsRemaining--;
+        if (rel.pactTurnsRemaining <= 0) {
+          rel.status = 'COOLDOWN';
+          rel.cooldownTurnsRemaining = RULES.pactCooldown;
+          next.events.push({
+            turn: next.turn,
+            playerId: 0,
+            type: 'PACT_EXPIRED',
+            description: `⌛ Pakt Müddəti Bitdi: Dövlətlər arasındakı sülh müqaviləsi başa çatdı.`,
+          });
+        }
+      } else if (rel.status === 'COOLDOWN') {
+        rel.cooldownTurnsRemaining--;
+        if (rel.cooldownTurnsRemaining <= 0) {
+          rel.status = 'WAR';
+        }
+      }
+    }
+  }
+
   next.turn++;
 
   for (const p of next.players) {
