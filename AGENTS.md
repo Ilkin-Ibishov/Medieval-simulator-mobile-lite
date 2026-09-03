@@ -48,13 +48,19 @@ Bu layihə **Medieval Simulator**-un ultra-yüngül, sürətli, Antiyoy / Age of
 * **Dinamik Dövlət Başlıqları:** Xəritə sahə payına görə nisbi font miqyası ($\text{Ratio} = \frac{N_{\text{owned}}}{N_{\text{total}}}$) və BFS Largest Connected Cluster Centroid yerləşməsi.
 * **Mobil Smart Auto-Focus:** Oyuna başladıqda kameranın avtomatik oyunçunun krallığına fokuslanması (`zoom: 1.45`), `👑 Krallığım` və `🌍 Bütün Xəritə` sürətli kamera keçid çipləri.
 
+### D. Taktiki Paktlar və Sadə Diplomatiya (Tactical Pacts & Diplomacy)
+* **`PROPOSE_PACT` Action (15G):** İki dövlət arasında **3-turnlük Qeyri-Hücum Paktı (NAP)** bağlayır.
+* **`SEND_TRIBUTE` Action (10G):** Rəqib xəzinəsinə qızıl göndərərək münasibətləri və pakt şansını artırır.
+* **`BREAK_PACT` & Xəyanət Cəriməsi (20G):** Müttəfiqə hücum edildikdə pakt dərhal pozulur, **`20G` cərimə** tutulur və **6-turnlük soyuma rejimi** başlayır.
+* **Xəritədə İttifaq Qalxanı:** Pakt müttəfiqinin sərhədləri xəritədə zümrüd yaşılı cizgili zolaqla (`#4ade80`, `pact-ally-border`) işıqlanır.
+
 ---
 
 ## 4. Əsas Əmrlər
 
 ```bash
 npm run typecheck                # tsc --noEmit (0 xəta)
-npm test                         # vitest run (bütün 35 test yaşıl)
+npm test                         # vitest run (bütün 41 test yaşıl)
 npm run sim -- --games 200       # Balans və sürət hesabatı
 npm run sweep                    # RULES + BOT_CONFIG şəbəkəsi üzrə balans sweep-i
 npm run build                    # Production build
