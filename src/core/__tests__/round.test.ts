@@ -181,4 +181,43 @@ describe('Simultaneous round adjudication', () => {
     expect(res1.regionState[target.id].owner).toBe(res2.regionState[target.id].owner);
     expect(res1.regionState[target.id].troops).toBe(res2.regionState[target.id].troops);
   });
+
+  it('respects fortification defense bonus during simultaneous round combat', () => {
+    const g0 = createGame({ seed: 4242, playerCount: 2, regionCount: 16, humanCount: 0 });
+    const [a, b] = findEdge(g0);
+
+    // Defender at b has 3 troops + FORT = (3 + 2) * 1.5 = 7.5 defense power
+    // Attacker at a attacks with 7 troops (7 <= 7.5 -> Defeat)
+    const g = scenario({ [a]: [0, 7], [b]: [1, 3] });
+    g.regionState[b].building = 'FORT';
+
+    const next = resolveRound(g, {
+      0: [{ type: 'MOVE', from: a, to: b, count: 7 }],
+      1: [],
+    });
+
+    // Defender holds because fort provided +2 defense power!
+    expect(next.regionState[b].owner).toBe(1);
+    expect(next.regionState[b].building).toBe('FORT');
+  });
+
+  it('processes Phase 1 BUILD actions before Phase 2 troop movements', () => {
+    const g0 = createGame({ seed: 4242, playerCount: 2, regionCount: 16, humanCount: 0 });
+    const [a, b] = findEdge(g0);
+    const g = scenario({ [a]: [0, 8], [b]: [1, 3] });
+    g.players[1].treasury = 50;
+
+    // Player 1 builds FORT in phase 1, Player 0 attacks in phase 2 with 7 troops
+    const next = resolveRound(g, {
+      0: [{ type: 'MOVE', from: a, to: b, count: 7 }],
+      1: [{ type: 'BUILD', regionId: b, building: 'FORT' }],
+    });
+
+    // Fort was constructed before combat occurred, saving the province!
+    expect(next.regionState[b].owner).toBe(1);
+    expect(next.regionState[b].building).toBe('FORT');
+    const netGold = RULES.regionBaseIncome - next.regionState[b].troops * RULES.unitUpkeep;
+    expect(next.players[1].treasury).toBe(50 - RULES.fortCost + netGold);
+  });
 });
+

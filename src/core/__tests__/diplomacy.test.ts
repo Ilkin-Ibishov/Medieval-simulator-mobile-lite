@@ -9,18 +9,16 @@ describe('Tactical Pacts & Lightweight Diplomacy System', () => {
     let g = createGame({ seed: 42, playerCount: 3, regionCount: 16 });
     expect(g.diplomacy).toBeDefined();
 
-    // Check proposing pact between Player 0 and Player 1
     const check = canProposePact(g, 0, 1);
     expect(check.allowed).toBe(true);
     expect(check.acceptScore).toBeGreaterThan(0);
 
-    // Player 0 proposes pact to Player 1
     const startTreasury = g.players[0].treasury;
     g = applyAction(g, { type: 'PROPOSE_PACT', targetPlayer: 1 });
 
     expect(g.players[0].treasury).toBe(startTreasury - RULES.pactCost);
     expect(hasActivePact(g, 0, 1)).toBe(true);
-    expect(hasActivePact(g, 1, 0)).toBe(true); // Symmetric
+    expect(hasActivePact(g, 1, 0)).toBe(true);
 
     const rel = getDiplomaticRelation(g, 0, 1);
     expect(rel.status).toBe('PACT');
@@ -50,36 +48,31 @@ describe('Tactical Pacts & Lightweight Diplomacy System', () => {
     g = applyAction(g, { type: 'PROPOSE_PACT', targetPlayer: 1 });
     expect(hasActivePact(g, 0, 1)).toBe(true);
 
-    // Find border between Player 0 and Player 1
-    let p0Reg = -1;
-    let p1Reg = -1;
-    for (let r = 0; r < g.regionState.length; r++) {
-      if (g.regionState[r].owner === 0) {
-        const neighbor = g.map.regions[r].neighbors.find((n) => g.regionState[n].owner === 1);
-        if (neighbor !== undefined) {
-          p0Reg = r;
-          p1Reg = neighbor;
-          break;
-        }
-      }
-    }
+    // Explicitly configure two adjacent provinces for Player 0 and Player 1
+    const p0Reg = 0;
+    const p1Reg = g.map.regions[p0Reg].neighbors[0];
+    expect(p1Reg).toBeDefined();
 
-    if (p0Reg >= 0 && p1Reg >= 0) {
-      g.regionState[p0Reg].troops = 10;
-      const preTreasury = g.players[0].treasury;
+    g.regionState[p0Reg].owner = 0;
+    g.regionState[p0Reg].troops = 10;
+    g.regionState[p0Reg].exhaustedTroops = 0;
 
-      // Player 0 attacks Player 1 (Treason!)
-      g = applyAction(g, { type: 'MOVE', from: p0Reg, to: p1Reg, count: 5 });
+    g.regionState[p1Reg].owner = 1;
+    g.regionState[p1Reg].troops = 2;
 
-      expect(hasActivePact(g, 0, 1)).toBe(false);
-      const rel = getDiplomaticRelation(g, 0, 1);
-      expect(rel.status).toBe('COOLDOWN');
-      expect(rel.cooldownTurnsRemaining).toBe(RULES.pactCooldown * 2);
-      expect(g.players[0].treasury).toBe(Math.max(0, preTreasury - RULES.betrayalPenalty));
+    const preTreasury = g.players[0].treasury;
 
-      const treasonEvent = g.events.find((e) => e.type === 'PACT_BROKEN');
-      expect(treasonEvent).toBeDefined();
-    }
+    // Player 0 attacks Player 1 (Treason!)
+    g = applyAction(g, { type: 'MOVE', from: p0Reg, to: p1Reg, count: 5 });
+
+    expect(hasActivePact(g, 0, 1)).toBe(false);
+    const rel = getDiplomaticRelation(g, 0, 1);
+    expect(rel.status).toBe('COOLDOWN');
+    expect(rel.cooldownTurnsRemaining).toBe(RULES.pactCooldown * 2);
+    expect(g.players[0].treasury).toBe(Math.max(0, preTreasury - RULES.betrayalPenalty));
+
+    const treasonEvent = g.events.find((e) => e.type === 'PACT_BROKEN');
+    expect(treasonEvent).toBeDefined();
   });
 
   it('decrements pact duration each round and enters cooldown upon expiration', () => {
@@ -105,4 +98,40 @@ describe('Tactical Pacts & Lightweight Diplomacy System', () => {
     const expiredEvent = g.events.find((e) => e.type === 'PACT_EXPIRED');
     expect(expiredEvent).toBeDefined();
   });
+
+  it('strictly forbids proposing pact to self or to eliminated players', () => {
+    const g = createGame({ seed: 42, playerCount: 3, regionCount: 16 });
+
+    // Proposing to self
+    expect(canProposePact(g, 0, 0).allowed).toBe(false);
+
+    // Proposing to eliminated player
+    g.players[2].isAlive = false;
+    expect(canProposePact(g, 0, 2).allowed).toBe(false);
+  });
+
+  it('forbids proposing a pact during active cooldown or while active pact is in place', () => {
+    let g = createGame({ seed: 42, playerCount: 2, regionCount: 16 });
+    g = applyAction(g, { type: 'PROPOSE_PACT', targetPlayer: 1 });
+
+    // Cannot propose another pact while pact is active
+    expect(canProposePact(g, 0, 1).allowed).toBe(false);
+
+    // Fast-forward to cooldown
+    g = resolveRound(g, { 0: [], 1: [] });
+    g = resolveRound(g, { 0: [], 1: [] });
+    g = resolveRound(g, { 0: [], 1: [] }); // now COOLDOWN
+
+    expect(getDiplomaticRelation(g, 0, 1).status).toBe('COOLDOWN');
+    expect(canProposePact(g, 0, 1).allowed).toBe(false);
+  });
+
+  it('strictly forbids sending tribute to self or dead player', () => {
+    const g = createGame({ seed: 42, playerCount: 3, regionCount: 16 });
+    expect(canSendTribute(g, 0, 0).allowed).toBe(false);
+
+    g.players[2].isAlive = false;
+    expect(canSendTribute(g, 0, 2).allowed).toBe(false);
+  });
 });
+

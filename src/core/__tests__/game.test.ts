@@ -240,4 +240,29 @@ describe('Chokepoint pruning', () => {
   // it measurably worsened an unexplained seat-ID win-rate bias — see BALANCE.md
   // "KRİTİK DÜZƏLİŞ". The connectivity/symmetry guarantees above must hold regardless
   // of whether pruning is active, which is what they test.
+
+  it('strictly disallows all gameplay actions once the game is over', () => {
+    let game = createGame({ seed: 42, playerCount: 2, regionCount: 16 });
+    game.isOver = true;
+    game.winner = 0;
+
+    const canHire = canApplyAction(game, { type: 'HIRE', regionId: 0, count: 1 }, 0);
+    expect(canHire).toBe(false);
+
+    const canMove = canApplyAction(game, { type: 'MOVE', from: 0, to: 1, count: 1 }, 0);
+    expect(canMove).toBe(false);
+
+    const canBuild = canApplyAction(game, { type: 'BUILD', regionId: 0, building: 'FORT' }, 0);
+    expect(canBuild).toBe(false);
+  });
+
+  it('strictly disallows building fortifications on enemy or neutral provinces', () => {
+    const game = createGame({ seed: 100, playerCount: 2, regionCount: 16 });
+    const enemyRegion = game.regionState.findIndex((r) => r.owner === 1);
+    expect(enemyRegion).toBeGreaterThanOrEqual(0);
+
+    const canBuildOnEnemy = canApplyAction(game, { type: 'BUILD', regionId: enemyRegion, building: 'FORT' }, 0);
+    expect(canBuildOnEnemy).toBe(false);
+  });
 });
+

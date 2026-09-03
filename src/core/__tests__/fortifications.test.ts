@@ -54,14 +54,13 @@ describe('Fortifications System (Forts & Watchtowers)', () => {
       if (twoHopRegion !== null) break;
     }
 
-    if (twoHopRegion !== null) {
-      expect(getRegionVisibility(game, 0, twoHopRegion)).toBe('FOGGED');
+    expect(twoHopRegion).not.toBeNull();
+    expect(getRegionVisibility(game, 0, twoHopRegion!)).toBe('FOGGED');
 
-      // With watchtower on p0Region, twoHopRegion becomes BORDER (2-hop reconnaissance)
-      game.players[0].treasury = 50;
-      const gameWithTower = applyAction(game, { type: 'BUILD', regionId: p0Region, building: 'WATCHTOWER' });
-      expect(getRegionVisibility(gameWithTower, 0, twoHopRegion)).toBe('BORDER');
-    }
+    // With watchtower on p0Region, twoHopRegion becomes BORDER (2-hop reconnaissance)
+    game.players[0].treasury = 50;
+    const gameWithTower = applyAction(game, { type: 'BUILD', regionId: p0Region, building: 'WATCHTOWER' });
+    expect(getRegionVisibility(gameWithTower, 0, twoHopRegion!)).toBe('BORDER');
   });
 
   it('razes fortification when enemy conquers the province', () => {

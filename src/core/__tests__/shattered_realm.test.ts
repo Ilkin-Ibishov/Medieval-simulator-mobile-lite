@@ -62,17 +62,15 @@ describe('Shattered Realm (Sındırılmış Dünya) Campaign Scenario', () => {
     const neutralNeighbor = neighbors.find((n) => game.regionState[n].owner === -1);
     expect(neutralNeighbor).toBeDefined();
 
-    if (neutralNeighbor !== undefined) {
-      // March 6 troops to conquer neutral barony (which has 2 troops)
-      const afterMove = applyAction(game, {
-        type: 'MOVE',
-        from: p0Capital,
-        to: neutralNeighbor,
-        count: 6,
-      });
+    // March 6 troops to conquer neutral barony (which has 2 troops)
+    const afterMove = applyAction(game, {
+      type: 'MOVE',
+      from: p0Capital,
+      to: neutralNeighbor!,
+      count: 6,
+    });
 
-      expect(afterMove.regionState[neutralNeighbor].owner).toBe(0);
-      expect(afterMove.regionState[neutralNeighbor].troops).toBeGreaterThanOrEqual(1);
-    }
+    expect(afterMove.regionState[neutralNeighbor!].owner).toBe(0);
+    expect(afterMove.regionState[neutralNeighbor!].troops).toBeGreaterThanOrEqual(1);
   });
 });
