@@ -60,7 +60,7 @@ Bu layihə **Medieval Simulator**-un ultra-yüngül, sürətli, Antiyoy / Age of
 
 ```bash
 npm run typecheck                # tsc --noEmit (0 xəta)
-npm test                         # vitest run (bütün 41 test yaşıl)
+npm test                         # vitest run (bütün 72 test 14 suite üzrə yaşıl)
 npm run sim -- --games 200       # Balans və sürət hesabatı
 npm run sweep                    # RULES + BOT_CONFIG şəbəkəsi üzrə balans sweep-i
 npm run build                    # Production build
