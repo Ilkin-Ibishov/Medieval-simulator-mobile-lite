@@ -1,7 +1,13 @@
 import React from 'react';
 import { GameState } from '../core/types';
 import { getOwnedRegionCount } from '../core/rules';
-import { CrownIcon, SparklesIcon } from './Icons';
+import {
+  TrophyIcon,
+  SkullIcon,
+  CrossedSwordsIcon,
+  SparklesIcon,
+  BannerFlagIcon,
+} from './Icons';
 
 interface GameOverModalProps {
   gameState: GameState;
@@ -14,50 +20,47 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({ gameState, onPlayA
   const isHumanWinner = winner === 0;
   const winnerPlayer = winner !== null ? players[winner] : null;
 
-  // The winner is decided one of two ways: everyone else was actually wiped
-  // out, or the turn limit hit and they simply held the most territory. Only
-  // the first one is truthfully "destroyed all rivals" — conflating them
-  // told survivors they'd been annihilated when they hadn't been.
   const aliveCount = players.filter((p) => p.isAlive).length;
   const wasElimination = !isDraw && aliveCount <= 1;
   const humanSurvived = players[0].isAlive;
 
   let title: string;
-  let crownColorClass: string;
   let description: string;
+  let iconComponent: React.ReactNode;
 
   if (isDraw) {
-    title = '⚔️ HEÇ-HEÇƏ!';
-    crownColorClass = 'text-blue';
-    description = `Müharibə ${turn} turn sonra heç-heçə ilə başa çatdı.`;
+    title = 'MÜHARİBƏ BİTDİ: HEÇ-HEÇƏ';
+    description = `Qitə uğrunda döyüşlər ${turn} raund sonra heç-heçə ilə başa çatdı.`;
+    iconComponent = <CrossedSwordsIcon size={52} className="text-blue" />;
   } else if (isHumanWinner) {
-    title = '🏆 ZƏFƏR SƏNİNDİR!';
-    crownColorClass = 'text-gold';
+    title = 'ZƏFƏR TACQOYMASI!';
     description = wasElimination
-      ? `Bütün rəqiblərini darmadağın edərək ${turn} turn ərzində taxta sahibləndin.`
-      : `${turn} turn sonunda ən çox torpağa sahib olaraq taxtı ələ keçirdin.`;
+      ? `Bütün rəqib xanədanları darmadağın edərək ${turn} raund ərzində Dozia taxtına sahibləndin!`
+      : `${turn} raund sonunda qitənin ən qüdrətli hökmdarı kimi taxtı ələ keçirdin!`;
+    iconComponent = <TrophyIcon size={52} className="text-gold" />;
   } else {
-    title = humanSurvived ? '🏳️ MƏĞLUB OLDUN!' : '💀 SÜQUT ETDİN!';
-    crownColorClass = 'text-red';
+    title = humanSurvived ? 'MƏĞLUBİYYƏT!' : 'XANƏDANIN SÜQUTU!';
     description = wasElimination
-      ? `${winnerPlayer!.name} bütün rəqiblərini darmadağın edərək ${turn} turn ərzində taxta sahibləndi.`
-      : `${winnerPlayer!.name} ${turn} turn sonunda ən çox torpağa sahib olaraq qələbəni qazandı.`;
+      ? `${winnerPlayer!.name} bütün rəqiblərini darmadağın edərək ${turn} raund ərzində taxta sahibləndi.`
+      : `${winnerPlayer!.name} ${turn} raund sonunda ən çox torpağa sahib olaraq qələbə qazandı.`;
+    iconComponent = <SkullIcon size={52} className="text-red" />;
   }
 
   return (
     <div className="modal-backdrop">
-      <div className="modal-content text-center">
+      <div className="modal-content coronation-modal text-center">
         <div className="winner-icon-wrapper">
-          <CrownIcon size={56} className={crownColorClass} />
+          {iconComponent}
         </div>
 
         <h1 className="game-over-title">{title}</h1>
-
         <p className="game-over-desc">{description}</p>
 
         {/* Territory breakdown */}
         <div className="game-over-breakdown">
-          <h4 className="breakdown-header">Yekun Torpaq Bölgüsü:</h4>
+          <h4 className="breakdown-header">
+            <BannerFlagIcon size={14} className="text-gold" /> Yekun Qitə Torpaq Bölgüsü:
+          </h4>
           {players.map((p) => {
             const count = getOwnedRegionCount(gameState, p.id);
             const pct = Math.round((count / map.regions.length) * 100);
@@ -85,9 +88,10 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({ gameState, onPlayA
         </div>
 
         <button className="btn btn-gold btn-large btn-block mt-4" onClick={onPlayAgain}>
-          <SparklesIcon size={18} /> Yenidən Oyna
+          <SparklesIcon size={18} /> Yeni Səltənətə Başla
         </button>
       </div>
     </div>
   );
 };
+

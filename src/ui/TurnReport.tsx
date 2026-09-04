@@ -7,6 +7,16 @@ import {
   getOwnedRegionCount,
   calculatePlayerTroopCount,
 } from '../core/rules';
+import {
+  CrownIcon,
+  ShieldIcon,
+  FortressIcon,
+  CoinBagIcon,
+  SkullIcon,
+  WarningSealIcon,
+  FeatherQuillIcon,
+  TreasuryScaleIcon,
+} from './Icons';
 
 interface TurnReportProps {
   gameState: GameState;
@@ -26,23 +36,37 @@ export const TurnReport: React.FC<TurnReportProps> = ({ gameState, onClose }) =>
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <h2 className="modal-title">📜 Raund {turn} Hesabatı</h2>
+      <div className="modal-content royal-chronicle-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="chronicle-header-row">
+          <div className="chronicle-icon-badge">
+            <FeatherQuillIcon size={24} className="text-gold" />
+          </div>
+          <div>
+            <h2 className="modal-title">Raund {turn} Salnaməsi</h2>
+            <span className="chronicle-subtitle">Hərbi Xəzinə və Qitə Qüvvələr Balansı</span>
+          </div>
+        </div>
 
         {/* Treasury breakdown */}
         <div className="report-stats-grid">
           <div className="stat-card">
-            <span className="stat-label">Ərazi Gəliri</span>
+            <span className="stat-label">
+              <FortressIcon size={13} /> Ərazi Gəliri
+            </span>
             <span className="stat-value text-green">+{income}G</span>
           </div>
           <div className="stat-card">
-            <span className="stat-label">Ordu Maaşı (Upkeep)</span>
+            <span className="stat-label">
+              <ShieldIcon size={13} /> Ordu Maaşı (Upkeep)
+            </span>
             <span className="stat-value text-red">-{upkeep}G</span>
           </div>
           <div className="stat-card stat-card-wide">
-            <span className="stat-label">Xalis Gəlir / Xəzinə</span>
+            <span className="stat-label">
+              <TreasuryScaleIcon size={13} /> Xalis Gəlir / Mövcud Xəzinə
+            </span>
             <span className={`stat-value ${net >= 0 ? 'text-green' : 'text-red'}`}>
-              {net >= 0 ? `+${net}` : net}G · Xəzinə: {human.treasury}G
+              <CoinBagIcon size={16} /> {net >= 0 ? `+${net}` : net}G · Xəzinə: {human.treasury}G
             </span>
           </div>
         </div>
@@ -50,7 +74,9 @@ export const TurnReport: React.FC<TurnReportProps> = ({ gameState, onClose }) =>
         {/* Critical Capital Occupation Danger Alert */}
         {human.isAlive && gameState.regionState[human.capital]?.owner !== human.id && (
           <div className="capital-danger-banner">
-            <div className="capital-danger-icon">👑⚠️</div>
+            <div className="capital-danger-icon">
+              <WarningSealIcon size={24} className="text-red" />
+            </div>
             <div className="capital-danger-text">
               <strong>PAYTAXTIN İŞĞAL ALTINDADIR!</strong>
               <span>{gameState.map.regions[human.capital]?.name} əyalətini <strong>{Math.max(0, 5 - (human.capitalLostTurns || 0))} raund</strong> ərzində azad etməsən krallığın çökəcək!</span>
@@ -60,7 +86,9 @@ export const TurnReport: React.FC<TurnReportProps> = ({ gameState, onClose }) =>
 
         {/* Live Faction Leaderboard */}
         <div className="faction-leaderboard-container">
-          <h4 className="breakdown-header">Qlobal Fraksiya Reytinqi:</h4>
+          <h4 className="breakdown-header">
+            <CrownIcon size={14} className="text-gold" /> Qlobal Qüvvələr Balansı:
+          </h4>
           <div className="faction-leaderboard-list">
             {players.map((p) => {
               const count = getOwnedRegionCount(gameState, p.id);
@@ -82,13 +110,19 @@ export const TurnReport: React.FC<TurnReportProps> = ({ gameState, onClose }) =>
                         style={{ backgroundColor: p.color }}
                       />
                       <span className="faction-name-text">{p.name}</span>
-                      {isFallen && <span className="status-pill status-fallen">Süqut</span>}
+                      {isFallen && (
+                        <span className="status-pill status-fallen">
+                          <SkullIcon size={11} /> Süqut
+                        </span>
+                      )}
                       {!isFallen && holdsCapital && (
-                        <span className="capital-crown-tag" title="Paytaxt nəzarətdədir">👑</span>
+                        <span className="capital-crown-tag" title="Paytaxt nəzarətdədir">
+                          <CrownIcon size={12} className="text-gold" />
+                        </span>
                       )}
                       {!isFallen && !holdsCapital && (
                         <span className="status-pill status-danger" title="Paytaxt işğaldadır">
-                          ⚠️ {capLeft}r
+                          <WarningSealIcon size={11} /> {capLeft}r
                         </span>
                       )}
                     </div>
@@ -117,11 +151,14 @@ export const TurnReport: React.FC<TurnReportProps> = ({ gameState, onClose }) =>
 
         {/* Events log */}
         {recentEvents.length > 0 && (
-          <div className="events-log-container" style={{ marginTop: 12 }}>
-            <h4 className="events-header">Son Hadisələr:</h4>
+          <div className="events-log-container">
+            <h4 className="events-header">
+              <FeatherQuillIcon size={13} className="text-gold" /> Son Hadisələr Salnaməsi:
+            </h4>
             <div className="events-list">
               {recentEvents.map((ev, i) => (
                 <div key={i} className="event-item">
+                  <span className="event-bullet-point">§</span>
                   <span className="event-desc">{ev.description}</span>
                 </div>
               ))}
@@ -130,9 +167,10 @@ export const TurnReport: React.FC<TurnReportProps> = ({ gameState, onClose }) =>
         )}
 
         <button className="btn btn-gold btn-block mt-4" onClick={onClose}>
-          Döyüşə Qayıt
+          Döyüş Meydanına Qayıt
         </button>
       </div>
     </div>
   );
 };
+

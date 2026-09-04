@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { CrownIcon, UsersIcon, SettingsIcon, RefreshIcon } from './Icons';
+import {
+  CrownIcon,
+  CrossedSwordsIcon,
+  UsersIcon,
+  RefreshIcon,
+  SoundIcon,
+  HapticsIcon,
+  DiceIcon,
+  SparklesIcon,
+  CompassIcon,
+  BannerFlagIcon,
+} from './Icons';
 import { sounds } from './sound';
 import { haptics } from './haptics';
 import { loadSettings, saveSettings, applySettings, Settings } from './settings';
@@ -93,50 +104,59 @@ export const Lobby: React.FC<LobbyProps> = ({
         {hasSavedGame && onResumeGame && (
           <div style={{ marginBottom: 14 }}>
             <button
-              className="btn btn-primary btn-block"
+              className="btn btn-primary btn-block btn-resume"
               onClick={onResumeGame}
-              style={{ background: '#3d5a80', border: '1px solid #5f7a9c', padding: '14px 16px' }}
             >
-              🛡️ Cari Partiyanı Davam Et
+              <BannerFlagIcon size={18} /> Cari Partiyanı Davam Et
             </button>
           </div>
         )}
 
-        {/* Mode 1: Grand Campaign (Dozia) */}
-        <div className="mode-card primary-card" style={{ borderColor: 'rgba(217, 164, 58, 0.7)' }}>
+        {/* Mode 1: Grand Campaign (Dozia) - Styled as Sovereign Campaign Tome */}
+        <div className="mode-card primary-card campaign-tome-card">
           <div className="card-header-row">
             <div className="card-icon-title">
-              <span style={{ fontSize: 22 }}>👑</span>
-              <h2 className="card-title" style={{ color: '#fae19c' }}>
-                Böyük Dozia Kampaniyası
-              </h2>
+              <span className="tome-crest-badge">
+                <CrownIcon size={22} className="text-gold" />
+              </span>
+              <div>
+                <h2 className="card-title text-gold">
+                  Böyük Dozia Kampaniyası
+                </h2>
+                <span className="tome-subtitle">Nativ Qitə Atlası · 10 Xanədan</span>
+              </div>
             </div>
-            <span className="badge-coming-soon" style={{ background: '#d9a43a', color: '#1a1208', fontWeight: 'bold' }}>
-              Atlas
-            </span>
+            <span className="badge-ribbon-gold">Atlas</span>
           </div>
           <p className="card-description">
-            117 nativ əyalət və 10 tarixi krallıqla böyük qitə fəthi. Xəritəni canlı kəşf edərək hökmranlıq edəcəyin krallığı seç!
+            117 sıfır-drift əyalət və 10 tarixi krallıqla böyük qitə fəthi. Xəritəni canlı kəşf edərək hökmranlıq edəcəyin krallığı seç!
           </p>
 
           <button
-            className="btn btn-gold btn-block"
+            className="btn btn-gold btn-block btn-tome-cta"
             onClick={() => {
               sounds.playClick();
               haptics.medium();
               onOpenRealmPicker();
             }}
-            style={{ marginTop: 14, padding: '14px 16px', fontSize: 16 }}
           >
-            🗺️ Xəritədən Krallıq Seç və Fəthə Başla ➔
+            <CompassIcon size={20} /> Xəritədən Krallıq Seç və Fəthə Başla ➔
           </button>
         </div>
 
         {/* Mode 2: Fast Skirmish */}
-        <div className="mode-card" style={{ background: 'rgba(22, 17, 11, 0.7)', border: '1px solid #4a3c28' }}>
-          <h2 className="card-title">⚡ Sürətli Təsadüfi Oyun</h2>
+        <div className="mode-card skirmish-card">
+          <div className="card-header-row">
+            <div className="card-icon-title">
+              <span className="skirmish-icon-badge">
+                <CrossedSwordsIcon size={20} className="text-gold" />
+              </span>
+              <h2 className="card-title">Sürətli Təsadüfi Oyun</h2>
+            </div>
+            <span className="badge-coming-soon">Prosedural</span>
+          </div>
           <p className="card-description">
-            Təsadüfi prosedural xəritədə hiyləsiz AI lordlarına qarşı 5–10 dəqiqəlik sürətli partiya.
+            Təsadüfi prosedural Voronoi xəritəsində hiyləsiz AI lordlarına qarşı 5–10 dəqiqəlik sürətli partiya.
           </p>
 
           <div className="lobby-controls">
@@ -183,8 +203,13 @@ export const Lobby: React.FC<LobbyProps> = ({
 
             {/* Seed Control */}
             <div className="control-group">
-              <label htmlFor="seed-input" className="control-label">Xəritə Kodu (Seed):</label>
+              <label htmlFor="seed-input" className="control-label">
+                Xəritə Toxumu (Seed):
+              </label>
               <div className="seed-input-row">
+                <div className="seed-prefix-icon">
+                  <DiceIcon size={16} className="text-gold" />
+                </div>
                 <input
                   id="seed-input"
                   name="seed"
@@ -192,9 +217,9 @@ export const Lobby: React.FC<LobbyProps> = ({
                   value={seed}
                   onChange={(e) => setSeed(parseInt(e.target.value, 10) || 1)}
                   className="seed-input"
-                  aria-label="Xəritə Kodu"
+                  aria-label="Xəritə Toxumu"
                 />
-                <button className="seed-rand-btn" onClick={handleRandomizeSeed} aria-label="Təsadüfi Kod Seç">
+                <button className="seed-rand-btn" onClick={handleRandomizeSeed} aria-label="Təsadüfi Kod Seç" title="Yeni Təsadüfi Seed">
                   <RefreshIcon size={16} />
                 </button>
               </div>
@@ -202,7 +227,7 @@ export const Lobby: React.FC<LobbyProps> = ({
           </div>
 
           <button className="btn btn-primary btn-block" onClick={handleStartSkirmish}>
-            ⚔️ Sürətli Partiyaya Başla
+            <CrossedSwordsIcon size={18} /> Sürətli Partiyaya Başla
           </button>
         </div>
 
@@ -211,20 +236,15 @@ export const Lobby: React.FC<LobbyProps> = ({
           <div
             className="mode-card secondary-card"
             onClick={onOpenMockup}
-            style={{
-              borderColor: 'rgba(217, 119, 6, 0.6)',
-              background: 'rgba(217, 119, 6, 0.08)',
-              cursor: 'pointer',
-            }}
           >
             <div className="card-header-row">
               <div className="card-icon-title">
-                <span style={{ fontSize: 20 }}>🎨</span>
-                <h3 className="card-title-sm" style={{ color: '#fbbf24' }}>
+                <SparklesIcon size={20} className="text-gold" />
+                <h3 className="card-title-sm">
                   Xəritə Vizual Mockup (Demo)
                 </h3>
               </div>
-              <span className="badge-coming-soon" style={{ background: '#d97706', color: '#fff' }}>
+              <span className="badge-coming-soon badge-active">
                 Aktiv
               </span>
             </div>
@@ -238,8 +258,8 @@ export const Lobby: React.FC<LobbyProps> = ({
         <div className="mode-card secondary-card" onClick={onOpenMultiplayerModal}>
           <div className="card-header-row">
             <div className="card-icon-title">
-              <UsersIcon size={24} className="text-gold" />
-              <h3 className="card-title-sm">👥 Qlobal Multiplayer & Liqa</h3>
+              <UsersIcon size={20} className="text-gold" />
+              <h3 className="card-title-sm">Qlobal Liqa & Multiplayer</h3>
             </div>
             <span className="badge-coming-soon">Tezliklə</span>
           </div>
@@ -257,18 +277,21 @@ export const Lobby: React.FC<LobbyProps> = ({
             onClick={() => update({ sound: !settings.sound })}
             aria-pressed={settings.sound}
           >
-            <SettingsIcon size={18} /> Səs: {settings.sound ? 'Açıq 🔊' : 'Bağlı 🔇'}
+            <SoundIcon size={16} muted={!settings.sound} />
+            <span>Səs: {settings.sound ? 'Açıq' : 'Bağlı'}</span>
           </button>
           <button
             className="footer-btn"
             onClick={() => update({ haptics: !settings.haptics })}
             aria-pressed={settings.haptics}
           >
-            Titrəyiş: {settings.haptics ? 'Açıq 📳' : 'Bağlı 🚫'}
+            <HapticsIcon size={16} disabled={!settings.haptics} />
+            <span>Titrəyiş: {settings.haptics ? 'Açıq' : 'Bağlı'}</span>
           </button>
         </div>
-        <span className="footer-version">v0.1.0 Lite · Tam Offline</span>
+        <span className="footer-version">v0.2.0 · Wax & Vellum Edition</span>
       </footer>
     </div>
   );
 };
+

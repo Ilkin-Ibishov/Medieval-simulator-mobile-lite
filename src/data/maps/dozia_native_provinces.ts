@@ -45,7 +45,7 @@ export const DOZIA_KINGDOMS_METADATA: Record<number, KingdomMetadata> = {
     tagline: 'Şərq Dağlıqları & Sərhəd Qalası',
     description: 'Şərq dağ silsilələrində möhkəmlənmiş, dənizə çıxışı olan müdafiə krallığı.',
     difficulty: 'ORTA',
-    trait: '🏔️ Dağ Sərhədləri',
+    trait: 'Dağ Sərhədləri',
   },
   2: {
     stateId: 2,
@@ -55,7 +55,7 @@ export const DOZIA_KINGDOMS_METADATA: Record<number, KingdomMetadata> = {
     tagline: 'Cənub Yarımadası & Qala Şəbəkəsi',
     description: 'Dozianın cənub burnunu tutan, dar boğazlarla qorunan güclü knyazlıq.',
     difficulty: 'ASAN',
-    trait: '🛡️ Təbii Boğazlar',
+    trait: 'Təbii Boğazlar',
   },
   3: {
     stateId: 3,
@@ -65,7 +65,7 @@ export const DOZIA_KINGDOMS_METADATA: Record<number, KingdomMetadata> = {
     tagline: 'Şimal-Şərq Meşələri',
     description: 'Zəngin meşəliklərlə əhatə olunmuş, qonşularına qarşı sürətli basqınlar təşkil edən krallıq.',
     difficulty: 'ÇƏTİN',
-    trait: '🌲 Meşə Pusquları',
+    trait: 'Meşə Pusquları',
   },
   4: {
     stateId: 4,
@@ -75,7 +75,7 @@ export const DOZIA_KINGDOMS_METADATA: Record<number, KingdomMetadata> = {
     tagline: 'Şərq Düzənlikləri & Döyüş Meydanı',
     description: 'Dozianın mərkəz-şərq düzənliklərində 4 tərəfdən sərhədi olan qızğın müharibə meydanı.',
     difficulty: 'ÇƏTİN',
-    trait: '⚔️ Qaynar Qazan',
+    trait: 'Qaynar Qazan',
   },
   5: {
     stateId: 5,
@@ -85,7 +85,7 @@ export const DOZIA_KINGDOMS_METADATA: Record<number, KingdomMetadata> = {
     tagline: 'Cənub-Şərq Sahil Hersoqluğu',
     description: 'Cənub-şərq buxtasında yerləşən, zəngin ticarət yollarına nəzarət edən cəsur hersoqluq.',
     difficulty: 'ORTA',
-    trait: '⚓ Sahil Ticarəti',
+    trait: 'Sahil Ticarəti',
   },
   6: {
     stateId: 6,
@@ -95,7 +95,7 @@ export const DOZIA_KINGDOMS_METADATA: Record<number, KingdomMetadata> = {
     tagline: 'Şimal Yarımadası & Sıldırım Qayalıqlar',
     description: 'Şimalın ucqar yarımadasında yerləşən kompakt və tək cəbhəli dövlət.',
     difficulty: 'ORTA',
-    trait: '⚡ Tək Cəbhəli Sərhəd',
+    trait: 'Tək Cəbhəli Sərhəd',
   },
   7: {
     stateId: 7,
@@ -105,7 +105,7 @@ export const DOZIA_KINGDOMS_METADATA: Record<number, KingdomMetadata> = {
     tagline: 'Şimal-Qərb Limanları',
     description: 'Şimal-qərb sahillərində yerləşən, dəniz və quru keçidlərinə hakim liman dövləti.',
     difficulty: 'ORTA',
-    trait: '🌊 Liman Qüvvəsi',
+    trait: 'Liman Qüvvəsi',
   },
   8: {
     stateId: 8,
@@ -115,7 +115,7 @@ export const DOZIA_KINGDOMS_METADATA: Record<number, KingdomMetadata> = {
     tagline: 'Böyük Qitə İmperiyası & Mərkəzi Hakimiyyət',
     description: 'Dozianın ən böyük ərazisinə malik hegemon imperiyası. Nəhəng gəlir və geniş sərhədlər.',
     difficulty: 'ASAN',
-    trait: '🌟 Nəhəng İqtisadiyyat',
+    trait: 'Nəhəng İqtisadiyyat',
   },
   9: {
     stateId: 9,
@@ -125,7 +125,7 @@ export const DOZIA_KINGDOMS_METADATA: Record<number, KingdomMetadata> = {
     tagline: 'Şərq Dəniz Adası & Təcrid Olunmuş Qala',
     description: 'Dəniz yolları ilə qorunan böyük ada imperiyası. İşğalçılar üçün aşılmaz təbii baryer.',
     difficulty: 'ASAN',
-    trait: '🏝️ Ada Qorunması',
+    trait: 'Ada Qorunması',
   },
   10: {
     stateId: 10,
@@ -135,7 +135,7 @@ export const DOZIA_KINGDOMS_METADATA: Record<number, KingdomMetadata> = {
     tagline: 'Şimal Qüdrəti & Dəmir Qvardiya',
     description: 'Şimalın ən güclü hərbi maşını. Güclü qarnizonları və strateji keçidləri ilə fateh xalq.',
     difficulty: 'ASAN',
-    trait: '👑 Dəmir İntizam',
+    trait: 'Dəmir İntizam',
   },
 };
 

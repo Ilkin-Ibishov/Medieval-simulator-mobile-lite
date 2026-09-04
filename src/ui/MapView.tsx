@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { GameState, Region } from '../core/types';
 import { getRegionVisibility, hasActivePact } from '../core';
 import { haptics } from './haptics';
+import { CrownIcon, CompassIcon, FortressIcon, WatchtowerIcon } from './Icons';
 import type { Floater } from './App';
 
 interface MapViewProps {
@@ -492,19 +493,19 @@ export const MapView: React.FC<MapViewProps> = ({
           <button
             className="zoom-btn"
             onClick={focusOnRealm}
-            title="👑 Öz Krallığına Fokuslan"
-            style={{ fontSize: 13 }}
+            title="Öz Krallığına Fokuslan"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            👑
+            <CrownIcon size={14} color="#f59e0b" />
           </button>
           {(zoom !== 1.0 || pan.x !== 0 || pan.y !== 0) && (
             <button
               className="zoom-btn zoom-btn-reset"
               onClick={resetToOverview}
-              title="🌍 Bütün Xəritə (Sıfırla)"
-              style={{ fontSize: 13 }}
+              title="Bütün Xəritə (Sıfırla)"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              🌍
+              <CompassIcon size={14} color="#94a3b8" />
             </button>
           )}
         </div>
@@ -968,21 +969,18 @@ export const MapView: React.FC<MapViewProps> = ({
                       <circle
                         cx="0"
                         cy="0"
-                        r="7.5"
+                        r="8"
                         fill={rState.building === 'FORT' ? '#78350f' : '#0369a1'}
                         stroke={rState.building === 'FORT' ? '#f59e0b' : '#38bdf8'}
                         strokeWidth="1.2"
                       />
-                      <text
-                        x="0"
-                        y="3"
-                        textAnchor="middle"
-                        fontSize="8.5"
-                        fill="#ffffff"
-                        fontWeight="bold"
-                      >
-                        {rState.building === 'FORT' ? '🏰' : '🗼'}
-                      </text>
+                      <g transform="translate(-4.5, -4.5)">
+                        {rState.building === 'FORT' ? (
+                          <FortressIcon size={9} color="#fef08a" />
+                        ) : (
+                          <WatchtowerIcon size={9} color="#bae6fd" />
+                        )}
+                      </g>
                     </g>
                   )}
 

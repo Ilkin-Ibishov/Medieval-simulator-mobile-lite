@@ -1970,40 +1970,441 @@ body::after {
 }
 
 /* ==========================================================================
-   Tactical Diplomacy & Pacts Styling
+   Wax & Vellum Medieval UI Refinement Classes
    ========================================================================== */
 
-.btn-diplomacy {
-  background: rgba(30, 41, 59, 0.85);
-  border: 1px solid rgba(74, 222, 128, 0.35);
-  color: #86efac;
-  gap: 5px;
+/* Campaign Tome & Mode Cards */
+.campaign-tome-card {
+  background: radial-gradient(ellipse at 80% 20%, rgba(217, 164, 58, 0.12), transparent 70%), var(--bg-card);
+  border: 1.5px solid var(--border-gold);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(250, 225, 156, 0.15);
 }
 
-.btn-diplomacy:hover {
-  background: rgba(34, 197, 94, 0.2);
-  border-color: #4ade80;
+.tome-crest-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(125, 37, 50, 0.2);
+  border: 1px solid var(--border-gold);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(217, 164, 58, 0.2);
 }
 
+.tome-subtitle {
+  font-family: var(--font-serif);
+  font-size: 0.72rem;
+  color: var(--brass-bright);
+  font-style: italic;
+}
+
+.badge-ribbon-gold {
+  background: linear-gradient(135deg, rgba(217, 164, 58, 0.35), rgba(141, 116, 66, 0.2));
+  color: var(--text-gold);
+  border: 1px solid var(--border-gold);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-ribbon-primary {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(30, 58, 138, 0.2));
+  color: var(--text-blue);
+  border: 1px solid rgba(122, 151, 191, 0.4);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-tome-cta {
+  margin-top: 14px;
+  padding: 13px 18px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.skirmish-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+}
+
+.skirmish-icon-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(141, 116, 66, 0.15);
+  border: 1px solid var(--brass-dim);
+  border-radius: 6px;
+}
+
+.seed-prefix-icon {
+  display: flex;
+  align-items: center;
+  padding: 0 4px 0 10px;
+}
+
+.btn-resume {
+  background: rgba(44, 53, 64, 0.9);
+  border: 1px solid var(--border-gold);
+  padding: 14px 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* War Command Slab & ActionHUD */
+.war-command-slab {
+  border: 1.5px solid var(--border-gold);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(250, 225, 156, 0.1);
+}
+
+.hud-crest-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--brass-dim);
+  border-radius: 6px;
+}
+
+.hud-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+
+.hud-status-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-gold);
+  background: rgba(217, 164, 58, 0.15);
+  border: 1px solid rgba(217, 164, 58, 0.3);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.hud-stat-item {
+  font-size: 0.78rem;
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hud-building-tag {
+  color: var(--brass-bright);
+}
+
+/* Chancellery of Pacts (Diplomacy Modal) */
 .diplomacy-modal-card {
   width: 95%;
   max-width: 480px;
-  background: #111827;
-  border: 1px solid rgba(74, 222, 128, 0.3);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(34, 197, 94, 0.15);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-gold);
+  border-radius: 8px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.85), 0 0 24px rgba(217, 164, 58, 0.15);
+  padding: 16px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  position: relative;
+}
+
+.modal-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.modal-close-btn {
+  background: rgba(30, 24, 16, 0.6);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-dim);
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.modal-close-btn:hover {
+  background: rgba(125, 37, 50, 0.4);
+  border-color: var(--crimson);
+  color: var(--gold-light);
+}
+
+.modal-crest-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(125, 37, 50, 0.2);
+  border: 1px solid var(--border-gold);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.diplomacy-list-scroll {
+  overflow-y: auto;
+  flex: 1;
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .diplomacy-kingdom-card {
+  background: rgba(20, 16, 11, 0.7);
+  border: 1px solid var(--border-subtle);
+  border-left-width: 4px;
+  border-radius: 6px;
+  padding: 12px 14px;
   transition: all 0.2s ease;
 }
 
 .diplomacy-kingdom-card:hover {
-  background: rgba(255, 255, 255, 0.05) !important;
+  background: rgba(36, 29, 19, 0.9);
+  border-color: var(--brass-dim);
 }
 
-.kingdom-dead {
-  opacity: 0.45;
-  filter: grayscale(0.7);
+.kingdom-pact-active {
+  background: rgba(61, 102, 71, 0.15) !important;
+  border-color: rgba(127, 174, 134, 0.4) !important;
+}
+
+.diplomacy-kingdom-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.diplomacy-kingdom-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.diplomacy-heraldic-shield {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.diplomacy-kingdom-name {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.badge-pact-active {
+  background: rgba(61, 102, 71, 0.3);
+  color: #a7f3d0;
+  border: 1px solid var(--verdigris);
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-pact-cooldown {
+  background: rgba(120, 53, 15, 0.3);
+  color: #fde68a;
+  border: 1px solid rgba(217, 164, 58, 0.5);
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-pact-war {
+  background: rgba(44, 53, 64, 0.4);
+  color: #cbd5e1;
+  border: 1px solid #475569;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.diplomacy-stats-row {
+  display: flex;
+  gap: 14px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.diplomacy-stats-row > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.diplomacy-chance-tag {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.diplomacy-chance-tag.high {
+  color: var(--text-green);
+}
+
+.diplomacy-chance-tag.low {
+  color: var(--text-red);
+}
+
+.diplomacy-actions-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.btn-diplomacy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  padding: 6px 12px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.diplomacy-cooldown-text,
+.diplomacy-fallen-text {
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-style: italic;
+}
+
+.diplomacy-cooldown-text {
+  color: var(--brass-bright);
+}
+
+.diplomacy-fallen-text {
+  color: var(--text-red);
+}
+
+.diplomacy-footer-bar {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 12px;
+}
+
+.diplomacy-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.diplomacy-treasury-badge {
+  font-size: 0.85rem;
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.diplomacy-treasury-badge strong {
+  color: var(--text-gold);
+}
+
+/* Royal Chronicle & Ledger (TurnReport) */
+.royal-chronicle-modal {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-gold);
+}
+
+.chronicle-header-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.chronicle-icon-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: rgba(125, 37, 50, 0.2);
+  border: 1px solid var(--border-gold);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.chronicle-subtitle {
+  font-family: var(--font-serif);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.event-bullet-point {
+  color: var(--brass-bright);
+  font-weight: bold;
+  margin-right: 6px;
 }
 
 .pact-ally-border {
@@ -2016,4 +2417,5 @@ body::after {
     stroke-dashoffset: -100;
   }
 }
+
 

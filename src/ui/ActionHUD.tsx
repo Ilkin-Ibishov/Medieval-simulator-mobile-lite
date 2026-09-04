@@ -1,7 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { GameState, Action, RULES } from '../core/types';
 import { getReadyTroops, previewCombat, getRegionVisibility } from '../core/rules';
-import { SwordIcon, ShieldIcon, CoinIcon } from './Icons';
+import {
+  SwordIcon,
+  CrossedSwordsIcon,
+  ShieldIcon,
+  SingleCoinIcon,
+  FortressIcon,
+  WatchtowerIcon,
+  CrownIcon,
+  FeatherQuillIcon,
+  CompassIcon,
+  WarningSealIcon,
+} from './Icons';
 import { sounds } from './sound';
 import { haptics } from './haptics';
 
@@ -101,9 +112,6 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
 
   const handleExecuteMove = () => {
     if (targetRegion === null || moveCount <= 0) return;
-    // No combat sound here on purpose: at this point the outcome is unknown to the UI.
-    // App plays the sound from the resulting event, so a won and a repelled assault
-    // no longer sound identical. Friendly marches have no outcome, so they stay.
     if (isFriendlyTarget) {
       sounds.playMarch();
       haptics.medium();
@@ -125,32 +133,49 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
       : 0;
 
   return (
-    <div className="action-hud-floating">
+    <div className="action-hud-floating war-command-slab">
       {/* HUD Header */}
       <div className="hud-header">
         <div className="hud-title-group">
-          <span className="hud-region-name">{currentRegion.name}</span>
-          <span className="hud-badge">
-            {isOwned
-              ? '👑 Sənin'
-              : isFogged
-              ? '🌫️ Duman Altında'
-              : '🏴 Düşmən'}{' '}
-            · {isFogged ? '?' : currentRState.troops} Qoşun
-            {isOwned && currentRState.exhaustedTroops > 0 && (
-              <span className="text-muted" style={{ marginLeft: 4 }}>
-                ({availableToMove} hazır)
-              </span>
-            )}{' '}
-            · +{isFogged ? '?' : currentRegion.income}G
-            {currentRState.building && (
-              <span className="text-gold" style={{ marginLeft: 4 }}>
-                · {currentRState.building === 'FORT' ? '🏰 Qala' : '🗼 Qüllə'}
-              </span>
+          <div className="hud-crest-icon">
+            {isOwned ? (
+              <CrownIcon size={18} className="text-gold" />
+            ) : isFogged ? (
+              <CompassIcon size={18} className="text-muted" />
+            ) : (
+              <SwordIcon size={18} className="text-red" />
             )}
-          </span>
+          </div>
+          <div>
+            <span className="hud-region-name">{currentRegion.name}</span>
+            <div className="hud-badge-row">
+              <span className="hud-status-pill">
+                {isOwned ? 'Mülk' : isFogged ? 'Duman' : 'Düşmən'}
+              </span>
+              <span className="hud-stat-item">
+                <ShieldIcon size={12} /> {isFogged ? '?' : currentRState.troops} Qoşun
+                {isOwned && currentRState.exhaustedTroops > 0 && (
+                  <span className="text-muted" style={{ marginLeft: 3 }}>
+                    ({availableToMove} hazır)
+                  </span>
+                )}
+              </span>
+              <span className="hud-stat-item text-gold">
+                <SingleCoinIcon size={12} /> +{isFogged ? '?' : currentRegion.income}G
+              </span>
+              {currentRState.building && (
+                <span className="hud-stat-item hud-building-tag">
+                  {currentRState.building === 'FORT' ? (
+                    <><FortressIcon size={12} /> Qala</>
+                  ) : (
+                    <><WatchtowerIcon size={12} /> Qüllə</>
+                  )}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
-        <button className="hud-close-btn" onClick={onDeselect} title="Bağla">
+        <button className="hud-close-btn" onClick={onDeselect} title="Bağla" aria-label="Bağla">
           ✕
         </button>
       </div>
@@ -165,14 +190,14 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
               disabled={maxAffordable < 1}
               onClick={() => handleHire(1)}
             >
-              <CoinIcon size={14} /> +1 ({RULES.unitCost}G)
+              <SingleCoinIcon size={13} /> +1 ({RULES.unitCost}G)
             </button>
             <button
               className="btn btn-primary btn-sm"
               disabled={maxAffordable < 3}
               onClick={() => handleHire(Math.min(3, maxAffordable))}
             >
-              <CoinIcon size={14} /> +3 ({Math.min(3, maxAffordable) * RULES.unitCost}G)
+              <SingleCoinIcon size={13} /> +3 ({Math.min(3, maxAffordable) * RULES.unitCost}G)
             </button>
             {maxAffordable > 3 && (
               <button
@@ -195,8 +220,8 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
           {/* Tactical Fortifications Row */}
           <div className="hud-action-row" style={{ marginTop: 6 }}>
             {currentRState.building === 'FORT' ? (
-              <span className="badge-gold text-xs" style={{ padding: '4px 8px', borderRadius: 4 }}>
-                🏰 Qala Aktiv (+2 Müdafiə)
+              <span className="badge-ribbon-gold">
+                <FortressIcon size={13} /> Qala Aktiv (+2 Müdafiə)
               </span>
             ) : (
               <button
@@ -209,13 +234,13 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
                 }}
                 title="Qala: Müdafiə olunan qoşunlara +2 döyüş gücü verir"
               >
-                🏰 Qala ({RULES.fortCost}G)
+                <FortressIcon size={13} /> Qala ({RULES.fortCost}G)
               </button>
             )}
 
             {currentRState.building === 'WATCHTOWER' ? (
-              <span className="badge-primary text-xs" style={{ padding: '4px 8px', borderRadius: 4 }}>
-                🗼 Qüllə Aktiv (2-hop Kəşfiyyat)
+              <span className="badge-ribbon-primary">
+                <WatchtowerIcon size={13} /> Qüllə Aktiv (2-hop)
               </span>
             ) : (
               <button
@@ -228,7 +253,7 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
                 }}
                 title="Müşahidə Qülləsi: Dumanı 2 qat dərinliyinə açır"
               >
-                🗼 Qüllə ({RULES.watchtowerCost}G)
+                <WatchtowerIcon size={13} /> Qüllə ({RULES.watchtowerCost}G)
               </button>
             )}
           </div>
@@ -236,7 +261,9 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
           {/* Pending Planned Orders from this province */}
           {pendingMovesFromHere.length > 0 && (
             <div className="hud-pending-orders-list">
-              <span className="text-xs text-muted">Planlaşdırılmış Yürüşlər:</span>
+              <span className="text-xs text-muted">
+                <FeatherQuillIcon size={12} /> Planlaşdırılmış Yürüşlər:
+              </span>
               {pendingMovesFromHere.map((pm, idx) => (
                 <div key={`pm-${idx}`} className="hud-pending-order-chip">
                   <span>
@@ -256,7 +283,7 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
             </div>
           )}
 
-          {/* Unit fatigue notice if all troops in this province are resting or already assigned */}
+          {/* Unit fatigue notice */}
           {availableToMove === 0 && currentRState.troops > 0 && (
             <div className="hud-fatigue-notice">
               {queuedDepartures > 0
@@ -273,7 +300,12 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
           {/* Target Banner */}
           <div className="hud-target-row">
             <div className="hud-target-badge">
-              <strong>{isFriendlyTarget ? '🛡️ Köçür ➔ ' : '⚔️ Hücum ➔ '}</strong>
+              {isFriendlyTarget ? (
+                <ShieldIcon size={16} className="text-blue" />
+              ) : (
+                <CrossedSwordsIcon size={16} className="text-red" />
+              )}
+              <strong>{isFriendlyTarget ? 'Köçür ➔ ' : 'Hücum ➔ '}</strong>
               <span>
                 {targetR.name} ({targetRState.troops} əsgər)
               </span>
@@ -368,13 +400,13 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
             >
               <div className="hud-combat-status">
                 {combatPreview.willWin ? (
-                  <SwordIcon size={14} />
+                  <CrossedSwordsIcon size={15} />
                 ) : (
-                  <ShieldIcon size={14} />
+                  <WarningSealIcon size={15} />
                 )}
                 <span>
                   {combatPreview.willWin
-                    ? `Qələbə Proqnozu (${
+                    ? `Zəfər Proqnozu (${
                         combatPreview.confidence === 'CERTAIN_VICTORY'
                           ? 'Mütləq Zəfər'
                           : 'Yüksək Şans'
@@ -390,7 +422,7 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
                   Düşmən itkisi: <strong>~{combatPreview.defenderLosses}</strong>
                 </span>
                 <span>
-                  Qalan ordu: <strong>{combatPreview.attackerSurviving}</strong>
+                  Qalan: <strong>{combatPreview.attackerSurviving}</strong>
                 </span>
               </div>
             </div>
@@ -405,9 +437,9 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
             onClick={handleExecuteMove}
           >
             {isFriendlyTarget ? (
-              <>🛡️ Köçürmə Əmri Ver ({moveCount} Əsgər)</>
+              <><ShieldIcon size={16} /> Köçürmə Əmri Ver ({moveCount} Əsgər)</>
             ) : (
-              <>⚔️ Hücum Əmri Ver ({moveCount} Əsgər)</>
+              <><CrossedSwordsIcon size={16} /> Hücum Əmri Ver ({moveCount} Əsgər)</>
             )}
           </button>
         </div>
@@ -417,10 +449,11 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
       {!isOwned && isFogged && (
         <div className="hud-body">
           <div className="hud-fatigue-notice">
-            🌫️ Bu ərazi kəşf edilməmiş duman altındadır. Kəşfiyyat aparmaq üçün sərhəd əyalətinə yaxınlaşın.
+            <CompassIcon size={16} /> Bu ərazi kəşf edilməmiş duman altındadır. Kəşfiyyat aparmaq üçün yaxın sərhədə qoşun cəmləyin.
           </div>
         </div>
       )}
     </div>
   );
 };
+

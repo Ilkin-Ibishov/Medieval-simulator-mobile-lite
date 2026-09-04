@@ -1,5 +1,14 @@
 import React from 'react';
 import { DOZIA_KINGDOMS_METADATA } from '../data/maps/dozia_native_provinces';
+import {
+  CrownIcon,
+  CrossedSwordsIcon,
+  FortressIcon,
+  SingleCoinIcon,
+  DiceIcon,
+  ShieldIcon,
+  CompassIcon,
+} from './Icons';
 import { sounds } from './sound';
 import { haptics } from './haptics';
 
@@ -36,7 +45,7 @@ export const RealmPickerSheet: React.FC<RealmPickerSheetProps> = ({
     tagline: 'Tarixi Dozia Krallığı',
     description: 'Dozia qitəsində suveren hakimiyyət.',
     difficulty: 'ORTA' as const,
-    trait: '⚔️ Böyük Səltənət',
+    trait: 'Böyük Səltənət',
   };
 
   const getDifficultyBadge = (diff: 'ASAN' | 'ORTA' | 'ÇƏTİN') => {
@@ -62,10 +71,10 @@ export const RealmPickerSheet: React.FC<RealmPickerSheetProps> = ({
   const displayDescription = isShattered
     ? 'İmperiyalar süqut edib! Yalnız paytaxt qalası və 8 seçmə qoşunla başlayırsan. 107 azad baronluğu hamıdan tez fəth etmək üçün yarış!'
     : meta.description;
-  const displayTrait = isShattered ? '⚡ Bərabər Paytaxt Fəthi' : meta.trait;
+  const displayTrait = isShattered ? 'Bərabər Paytaxt Fəthi' : meta.trait;
 
   return (
-    <div className="realm-picker-sheet">
+    <div className="realm-picker-sheet dynasty-banner-sheet">
       {/* Header with Kingdom Name, Flag, & Badges */}
       <div className="realm-header-row">
         <div className="realm-title-group">
@@ -73,7 +82,7 @@ export const RealmPickerSheet: React.FC<RealmPickerSheetProps> = ({
             className="realm-color-dot"
             style={{
               background: stats.color,
-              boxShadow: `0 0 10px ${stats.color}`,
+              boxShadow: `0 0 12px ${stats.color}`,
             }}
           />
           <div>
@@ -94,7 +103,7 @@ export const RealmPickerSheet: React.FC<RealmPickerSheetProps> = ({
             {diffBadge.label}
           </span>
           <span className="realm-badge realm-trait-badge">
-            {displayTrait}
+            <ShieldIcon size={12} /> {displayTrait}
           </span>
         </div>
       </div>
@@ -105,21 +114,29 @@ export const RealmPickerSheet: React.FC<RealmPickerSheetProps> = ({
       {/* Key Stats Grid */}
       <div className="realm-stats-grid">
         <div className="realm-stat-box">
-          <span className="stat-label">🗺️ Ərazi Payı</span>
+          <span className="stat-label">
+            <CompassIcon size={13} /> Ərazi Payı
+          </span>
           <span className="stat-value text-gold">
             {displayProvinces} Əyalət ({displayMapShare}%)
           </span>
         </div>
         <div className="realm-stat-box">
-          <span className="stat-label">🏰 Paytaxt Şəhər</span>
+          <span className="stat-label">
+            <FortressIcon size={13} /> Paytaxt Şəhər
+          </span>
           <span className="stat-value">{stats.capitalName || meta.capitalName}</span>
         </div>
         <div className="realm-stat-box">
-          <span className="stat-label">⚔️ İlkin Ordu</span>
+          <span className="stat-label">
+            <CrossedSwordsIcon size={13} /> İlkin Ordu
+          </span>
           <span className="stat-value">{displayTroops} Qoşun</span>
         </div>
         <div className="realm-stat-box">
-          <span className="stat-label">💰 Turn Başına Gəlir</span>
+          <span className="stat-label">
+            <SingleCoinIcon size={13} /> Turn Başına Gəlir
+          </span>
           <span className="stat-value text-gold">+{displayIncome}G</span>
         </div>
       </div>
@@ -135,7 +152,7 @@ export const RealmPickerSheet: React.FC<RealmPickerSheetProps> = ({
           }}
           title="Təsadüfi Krallıq"
         >
-          🎲 Təsadüfi
+          <DiceIcon size={16} /> Təsadüfi
         </button>
 
         <button
@@ -147,9 +164,10 @@ export const RealmPickerSheet: React.FC<RealmPickerSheetProps> = ({
             onConfirmStart();
           }}
         >
-          👑 {stats.name} ilə Fəthə Başla
+          <CrownIcon size={18} /> {stats.name} ilə Fəthə Başla
         </button>
       </div>
     </div>
   );
 };
+

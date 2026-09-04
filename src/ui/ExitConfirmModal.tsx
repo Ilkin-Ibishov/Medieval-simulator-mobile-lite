@@ -1,4 +1,5 @@
 import React from 'react';
+import { ShieldIcon, BannerFlagIcon } from './Icons';
 import { sounds } from './sound';
 import { haptics } from './haptics';
 
@@ -14,12 +15,14 @@ export const ExitConfirmModal: React.FC<ExitConfirmModalProps> = ({
   return (
     <div className="modal-backdrop" onClick={onCancel}>
       <div className="modal-content text-center" onClick={(e) => e.stopPropagation()}>
-        <div style={{ fontSize: '2.5rem', marginBottom: 12 }}>🛡️</div>
+        <div className="winner-icon-wrapper" style={{ marginBottom: 12 }}>
+          <ShieldIcon size={44} className="text-gold" />
+        </div>
         <h2 className="card-title" style={{ fontSize: '1.25rem', marginBottom: 8 }}>
-          Döyüşdən Çıxış
+          Döyüşdən Çıxış və Saxlama
         </h2>
         <p className="card-description" style={{ fontSize: '0.85rem', marginBottom: 20 }}>
-          Cari döyüşün irəliləyişi avtomatik yadda saxlanılacaq və istənilən vaxt Lobby-dən davam etdirilə bilər.
+          Cari yürüşün vəziyyəti avtomatik yadda saxlanılacaq və istənilən vaxt Lobbi-dən davam etdirilə bilər.
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -31,7 +34,7 @@ export const ExitConfirmModal: React.FC<ExitConfirmModalProps> = ({
               onConfirmExit();
             }}
           >
-            Lobby-yə Qayıt (Yadda Saxla)
+            <BannerFlagIcon size={16} /> Lobbi-yə Qayıt (Yadda Saxla)
           </button>
           <button
             className="btn btn-secondary btn-block"
@@ -48,3 +51,4 @@ export const ExitConfirmModal: React.FC<ExitConfirmModalProps> = ({
     </div>
   );
 };
+

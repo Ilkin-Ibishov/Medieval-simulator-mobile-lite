@@ -8,17 +8,17 @@ interface MultiplayerModalProps {
 export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({ onClose }) => {
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content text-center" onClick={(e) => e.stopPropagation()}>
         <div className="text-center mb-3">
           <div className="multiplayer-icon-glow">
             <UsersIcon size={44} className="text-gold" />
           </div>
-          <h2 className="modal-title">👥 Qlobal Multiplayer Arena</h2>
+          <h2 className="modal-title">Qlobal Multiplayer Liqası</h2>
           <span className="badge-coming-soon">Tezliklə</span>
         </div>
 
         <p className="modal-text">
-          Hazırlanma mərhələsindədir — kifayət qədər aktiv oyunçu auditoriyası toplanan kimi buraxılacaq.
+          Həftəlik eyni xəritə toxumu üzrə beynəlxalq fəth turnirləri və real-vaxt turn-based PvP arenaları hazırlanır.
         </p>
 
         <button className="btn btn-gold btn-block mt-4" onClick={onClose}>
@@ -28,3 +28,4 @@ export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({ onClose }) =
     </div>
   );
 };
+

@@ -11,7 +11,15 @@ import { MultiplayerModal } from './MultiplayerModal';
 import { ExitConfirmModal } from './ExitConfirmModal';
 import { MockupView } from './MockupView';
 import { DiplomacyModal } from './DiplomacyModal';
-import { CoinIcon } from './Icons';
+import {
+  CrownIcon,
+  CrossedSwordsIcon,
+  SingleCoinIcon,
+  PactScrollIcon,
+  FeatherQuillIcon,
+  SkullIcon,
+  CoinBagIcon,
+} from './Icons';
 import { sounds } from './sound';
 import { haptics } from './haptics';
 import { RealmPickerSheet, RealmStats } from './RealmPickerSheet';
@@ -560,7 +568,7 @@ export const App: React.FC = () => {
                 setSelectedScenario('HEGEMONY');
               }}
             >
-              👑 Hegemonluq
+              <CrownIcon size={13} /> Hegemonluq
             </button>
             <button
               className={`scenario-tab-btn ${selectedScenario === 'SHATTERED' ? 'active' : ''}`}
@@ -570,7 +578,7 @@ export const App: React.FC = () => {
                 setSelectedScenario('SHATTERED');
               }}
             >
-              ⚔️ Sındırılmış Dünya
+              <CrossedSwordsIcon size={13} /> Sındırılmış Dünya
             </button>
           </div>
         </div>
@@ -634,13 +642,17 @@ export const App: React.FC = () => {
             className="active-player-chip"
             style={{ color: '#7a97bf' }}
           >
-            {isResolving ? '⏳ Həll olunur' : '👑 Planlaşdırma'}
+            {isResolving ? (
+              <><FeatherQuillIcon size={13} /> Həll olunur</>
+            ) : (
+              <><CrownIcon size={13} className="text-gold" /> Planlaşdırma</>
+            )}
           </span>
         </div>
 
         <div className="resource-bar">
           <div className="res-chip">
-            <CoinIcon size={16} className="text-gold" />
+            <SingleCoinIcon size={15} className="text-gold" />
             <span>{displayTreasury}G</span>
             <span className={netIncome >= 0 ? 'text-green' : 'text-red'} style={{ fontSize: '0.75rem' }}>
               ({netIncome >= 0 ? `+${netIncome}` : netIncome})
@@ -657,7 +669,7 @@ export const App: React.FC = () => {
             title="Diplomatiya və Paktlar"
             aria-label="Diplomatiya və Paktlar"
           >
-            <span aria-hidden="true">🤝</span>
+            <PactScrollIcon size={14} className="text-gold" />
             <span className="btn-report-label">Paktlar</span>
           </button>
 
@@ -667,7 +679,7 @@ export const App: React.FC = () => {
             title="Hesabat"
             aria-label="Hesabat"
           >
-            <span aria-hidden="true">📜</span>
+            <FeatherQuillIcon size={14} className="text-gold" />
             <span className="btn-report-label">Hesabat</span>
           </button>
         </div>
@@ -677,7 +689,12 @@ export const App: React.FC = () => {
       <main className="game-main-area">
         {announcement && (
           <div className={`round-announcement round-announcement-${announcement.kind}`}>
-            {announcement.kind === 'elimination' ? '💀' : '💸'} {announcement.text}
+            {announcement.kind === 'elimination' ? (
+              <SkullIcon size={16} className="text-red" />
+            ) : (
+              <CoinBagIcon size={16} className="text-gold" />
+            )}{' '}
+            <span>{announcement.text}</span>
           </div>
         )}
         <MapView

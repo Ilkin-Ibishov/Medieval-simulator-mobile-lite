@@ -8,6 +8,17 @@ import {
   getOwnedRegionCount,
 } from '../core/rules';
 import { DOZIA_KINGDOMS_METADATA } from '../data/maps/dozia_native_provinces';
+import {
+  PactScrollIcon,
+  TributeIcon,
+  ShieldIcon,
+  CrossedSwordsIcon,
+  FortressIcon,
+  SingleCoinIcon,
+  SkullIcon,
+  WarningSealIcon,
+  FeatherQuillIcon,
+} from './Icons';
 import { sounds } from './sound';
 import { haptics } from './haptics';
 
@@ -34,19 +45,20 @@ export const DiplomacyModal: React.FC<DiplomacyModalProps> = ({
   const otherKingdoms = gameState.players.filter((p) => p.id !== gameState.activePlayer);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-backdrop" onClick={onClose}>
       <div
-        className="modal-card diplomacy-modal-card"
+        className="modal-content diplomacy-modal-card"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxHeight: '88vh', display: 'flex', flexDirection: 'column' }}
       >
         <header className="modal-header">
           <div className="modal-title-row">
-            <span style={{ fontSize: 24 }}>🤝</span>
+            <span className="modal-crest-badge">
+              <PactScrollIcon size={24} className="text-gold" />
+            </span>
             <div>
-              <h2 className="modal-title">Taktiki Diplomatiya & Paktlar</h2>
+              <h2 className="modal-title">Səfirlər Palatası & Paktlar</h2>
               <p className="modal-subtitle">
-                Qonşularla sülh bağla, bir cinahı sığortala və ordunu cəmlə
+                Qonşu xanədanlarla sülh bağla, bir cinahı sığortala və fəthə cəmləş
               </p>
             </div>
           </div>
@@ -63,7 +75,7 @@ export const DiplomacyModal: React.FC<DiplomacyModalProps> = ({
           </button>
         </header>
 
-        <div className="modal-body diplomacy-list-scroll" style={{ overflowY: 'auto', flex: 1, padding: '12px 0' }}>
+        <div className="diplomacy-list-scroll">
           {otherKingdoms.map((k) => {
             const isAlive = k.isAlive && getOwnedRegionCount(gameState, k.id) > 0;
             const rel = getDiplomaticRelation(gameState, gameState.activePlayer, k.id);
@@ -77,117 +89,112 @@ export const DiplomacyModal: React.FC<DiplomacyModalProps> = ({
               <div
                 key={k.id}
                 className={`diplomacy-kingdom-card ${!isAlive ? 'kingdom-dead' : ''} ${rel.status === 'PACT' ? 'kingdom-pact-active' : ''}`}
-                style={{
-                  borderLeft: `4px solid ${k.color}`,
-                  background: rel.status === 'PACT' ? 'rgba(34, 197, 94, 0.08)' : 'rgba(255, 255, 255, 0.03)',
-                  borderRadius: 8,
-                  padding: '12px 14px',
-                  marginBottom: 10,
-                  border: rel.status === 'PACT' ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
-                }}
+                style={{ borderLeftColor: k.color }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div className="diplomacy-kingdom-header">
+                  <div className="diplomacy-kingdom-left">
                     <span
-                      style={{
-                        width: 14,
-                        height: 14,
-                        borderRadius: '50%',
-                        backgroundColor: k.color,
-                        display: 'inline-block',
-                      }}
-                    />
-                    <strong style={{ fontSize: '1rem', color: '#f3f4f6' }}>{k.name}</strong>
+                      className="diplomacy-heraldic-shield"
+                      style={{ backgroundColor: k.color, borderColor: k.color }}
+                    >
+                      <ShieldIcon size={12} className="text-white" />
+                    </span>
+                    <strong className="diplomacy-kingdom-name">{k.name}</strong>
                     {meta?.trait && (
-                      <span className="badge-trait" style={{ fontSize: '0.7rem', opacity: 0.8, color: '#fbbf24' }}>
+                      <span className="badge-trait">
                         {meta.trait}
                       </span>
                     )}
                   </div>
 
-                  {/* Status Badge */}
                   <div>
                     {rel.status === 'PACT' ? (
-                      <span className="badge-pact-active" style={{ background: '#166534', color: '#86efac', padding: '3px 8px', borderRadius: 12, fontSize: '0.75rem', fontWeight: 600 }}>
-                        🤝 Pakt ({rel.pactTurnsRemaining} turn)
+                      <span className="badge-pact-active">
+                        <PactScrollIcon size={12} /> Pakt ({rel.pactTurnsRemaining} turn)
                       </span>
                     ) : rel.status === 'COOLDOWN' ? (
-                      <span className="badge-pact-cooldown" style={{ background: '#78350f', color: '#fde68a', padding: '3px 8px', borderRadius: 12, fontSize: '0.75rem', fontWeight: 600 }}>
-                        ⏳ Soyuma ({rel.cooldownTurnsRemaining} turn)
+                      <span className="badge-pact-cooldown">
+                        <WarningSealIcon size={12} /> Soyuma ({rel.cooldownTurnsRemaining} turn)
                       </span>
                     ) : (
-                      <span className="badge-pact-war" style={{ background: '#374151', color: '#d1d5db', padding: '3px 8px', borderRadius: 12, fontSize: '0.75rem' }}>
-                        ⚔️ Neytral / Rəqib
+                      <span className="badge-pact-war">
+                        <CrossedSwordsIcon size={12} /> Neytral / Rəqib
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Realm Info Bar */}
-                <div style={{ display: 'flex', gap: 14, fontSize: '0.8rem', color: '#9ca3af', marginBottom: 10 }}>
-                  <span>🏰 {provinces} torpaq</span>
-                  <span>⚔️ {troops} əsgər</span>
-                  <span>💰 {k.treasury}G</span>
+                <div className="diplomacy-stats-row">
+                  <span>
+                    <FortressIcon size={13} /> {provinces} torpaq
+                  </span>
+                  <span>
+                    <ShieldIcon size={13} /> {troops} əsgər
+                  </span>
+                  <span className="text-gold">
+                    <SingleCoinIcon size={13} /> {k.treasury}G
+                  </span>
                   {pactCheck.allowed && (
-                    <span style={{ color: pactCheck.acceptChancePercent >= 60 ? '#4ade80' : '#f87171', marginLeft: 'auto' }}>
+                    <span className={`diplomacy-chance-tag ${pactCheck.acceptChancePercent >= 60 ? 'high' : 'low'}`}>
                       Pakt Şansı: {pactCheck.acceptChancePercent}%
                     </span>
                   )}
                 </div>
 
-                {/* Diplomatic Actions Row */}
                 {isAlive && (
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <div className="diplomacy-actions-row">
                     {rel.status === 'WAR' && (
                       <button
-                        className="btn btn-sm btn-primary"
+                        className="btn btn-sm btn-gold btn-diplomacy"
                         disabled={!pactCheck.allowed}
                         onClick={() => {
                           sounds.playMarch();
                           haptics.medium();
                           onProposePact(k.id);
                         }}
-                        style={{ flex: 1, minWidth: 140, fontSize: '0.8rem' }}
                       >
-                        🤝 Pakt Bağla ({RULES.pactCost}G)
+                        <PactScrollIcon size={14} /> Pakt Bağla ({RULES.pactCost}G)
                       </button>
                     )}
 
                     {rel.status === 'WAR' && (
                       <button
-                        className="btn btn-sm btn-secondary"
+                        className="btn btn-sm btn-secondary btn-diplomacy"
                         disabled={!tributeCheck.allowed}
                         onClick={() => {
-                          sounds.playClick();
-                          haptics.light();
+                          sounds.playHire();
+                          haptics.medium();
                           onSendTribute(k.id);
                         }}
-                        style={{ fontSize: '0.8rem' }}
-                        title="Dövlətin xəzinəsinə qızıl göndərərək münasibətləri yaxşılaşdır"
                       >
-                        💰 Töhfə ({RULES.tributeCost}G)
+                        <TributeIcon size={14} /> Xərac Göndər ({RULES.tributeCost}G)
                       </button>
                     )}
 
                     {rel.status === 'PACT' && (
                       <button
-                        className="btn btn-sm btn-danger"
+                        className="btn btn-sm btn-danger btn-diplomacy"
                         onClick={() => {
-                          sounds.playRepelled();
+                          sounds.playDisband();
                           haptics.heavy();
                           onBreakPact(k.id);
                         }}
-                        style={{ flex: 1, fontSize: '0.8rem', background: '#991b1b', color: '#fff', border: 'none' }}
                       >
-                        ⚡ Paktı Poz (-{RULES.betrayalPenalty}G)
+                        <CrossedSwordsIcon size={14} /> Paktı Poz (-{RULES.betrayalPenalty}G Cərimə)
                       </button>
                     )}
 
                     {rel.status === 'COOLDOWN' && (
-                      <span style={{ fontSize: '0.75rem', color: '#9ca3af', fontStyle: 'italic', alignSelf: 'center' }}>
-                        Danışıqlar üçün növbəti {rel.cooldownTurnsRemaining} turn gözləyin.
+                      <span className="diplomacy-cooldown-text">
+                        <FeatherQuillIcon size={13} /> Danışıqlar üçün növbəti {rel.cooldownTurnsRemaining} turn gözləyin.
                       </span>
                     )}
+                  </div>
+                )}
+
+                {!isAlive && (
+                  <div className="diplomacy-fallen-text">
+                    <SkullIcon size={14} /> Bu xanədan süqut edib və taxtdan salınıb.
                   </div>
                 )}
               </div>
@@ -195,20 +202,20 @@ export const DiplomacyModal: React.FC<DiplomacyModalProps> = ({
           })}
         </div>
 
-        <footer className="modal-footer" style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: 10 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <span style={{ fontSize: '0.85rem', color: '#9ca3af' }}>
-              Xəzinən: <strong style={{ color: '#fbbf24' }}>{human.treasury}G</strong>
+        <footer className="modal-footer diplomacy-footer-bar">
+          <div className="diplomacy-footer-row">
+            <span className="diplomacy-treasury-badge">
+              <SingleCoinIcon size={14} className="text-gold" /> Xəzinən: <strong>{human.treasury}G</strong>
             </span>
             <button
-              className="btn btn-secondary"
+              className="btn btn-primary"
               onClick={() => {
                 sounds.playClick();
                 haptics.light();
                 onClose();
               }}
             >
-              Bağla
+              Hərbi Ştaba Qayıt
             </button>
           </div>
         </footer>
