@@ -13,6 +13,7 @@ import { DiplomacyModal } from './DiplomacyModal';
 import { BetrayalConfirmModal } from './BetrayalConfirmModal';
 import {
   CrownIcon,
+  CrossedSwordsIcon,
   SingleCoinIcon,
   PactScrollIcon,
   FeatherQuillIcon,
@@ -487,7 +488,7 @@ export const App: React.FC = () => {
     const map = new Map<number, RealmStats>();
     for (const p of DOZIA_PROVINCES) {
       const isCap = p.isCapital;
-      const baseTroops = isCap ? 7 : (p.income && p.income >= 10 ? 6 : 4);
+      const baseTroops = isCap ? 5 : 2;
       const inc = p.income || 6;
 
       if (!map.has(p.stateId)) {
@@ -573,13 +574,13 @@ export const App: React.FC = () => {
         if (isShattered) {
           return {
             owner: isCap ? ownerIdx : -1,
-            troops: isCap ? 8 : 2,
+            troops: isCap ? 5 : 2,
             exhaustedTroops: 0,
           };
         }
         return {
           owner: ownerIdx,
-          troops: isCap ? 7 : (r.income && r.income >= 10 ? 6 : 4),
+          troops: isCap ? 5 : 2,
           exhaustedTroops: 0,
         };
       }),
@@ -595,7 +596,7 @@ export const App: React.FC = () => {
         {/* Top Floating Guide & Scenario Switcher Bar */}
         <div className="realm-picker-topbar">
           <button
-            className="btn btn-sm btn-ghost btn-back-lobby"
+            className="btn-picker-back"
             onClick={() => {
               sounds.playClick();
               haptics.light();
@@ -605,26 +606,26 @@ export const App: React.FC = () => {
             ← Lobbi
           </button>
 
-          <div className="scenario-switcher-chips">
+          <div className="realm-scenario-tabs">
             <button
-              className={`chip-scenario ${selectedScenario === 'HEGEMONY' ? 'active' : ''}`}
+              className={`scenario-tab-btn ${selectedScenario === 'HEGEMONY' ? 'active' : ''}`}
               onClick={() => {
                 sounds.playClick();
                 haptics.light();
                 setSelectedScenario('HEGEMONY');
               }}
             >
-              👑 Hegemonluq
+              <CrownIcon size={13} /> Hegemonluq
             </button>
             <button
-              className={`chip-scenario ${selectedScenario === 'SHATTERED' ? 'active' : ''}`}
+              className={`scenario-tab-btn ${selectedScenario === 'SHATTERED' ? 'active' : ''}`}
               onClick={() => {
                 sounds.playClick();
                 haptics.light();
                 setSelectedScenario('SHATTERED');
               }}
             >
-              ⚔️ Sındırılmış Dünya
+              <CrossedSwordsIcon size={13} /> Sındırılmış Dünya
             </button>
           </div>
         </div>

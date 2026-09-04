@@ -105,7 +105,7 @@ export function createGame(options: CreateGameOptions): GameState {
 
       let baseTroops = 2;
       if (ownerIdx >= 0) {
-        baseTroops = isCap ? RULES.startingTroops + 3 : (r.income && r.income >= 10 ? 6 : 4);
+        baseTroops = isCap ? 5 : 2;
       } else {
         baseTroops = 2; // Neutral barony garrison
       }

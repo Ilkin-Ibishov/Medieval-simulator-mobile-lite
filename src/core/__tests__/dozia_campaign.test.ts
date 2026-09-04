@@ -49,14 +49,15 @@ describe('Dozia Grand Campaign Mode', () => {
       const owner = game.regionState[i].owner;
       expect(owner).toBeGreaterThanOrEqual(0);
       expect(owner).toBeLessThan(9);
-      expect(game.regionState[i].troops).toBeGreaterThanOrEqual(4);
+      expect(game.regionState[i].troops).toBeGreaterThanOrEqual(2);
     }
 
-    // Income calculation works
+    // Income and net cash flow calculation works
     const income = calculatePlayerIncome(game, 0);
     const upkeep = calculatePlayerUpkeep(game, 0);
     expect(income).toBeGreaterThan(0);
     expect(upkeep).toBeGreaterThan(0);
+    expect(income - upkeep).toBeGreaterThan(0); // Positive starting profit
   });
 
   it('allows bots and human to simulate 5 consecutive rounds without errors', () => {
