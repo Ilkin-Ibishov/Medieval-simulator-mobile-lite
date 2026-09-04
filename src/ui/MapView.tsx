@@ -51,6 +51,10 @@ export const MapView: React.FC<MapViewProps> = ({
   const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [containerSize, setContainerSize] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
 
+  // Invariant screen scaling: counter-scales labels, troop seals, and badges inversely with zoom
+  // so their visual size on screen remains constant across all zoom levels (1.0x to 4.0x).
+  const invZoom = Number((1 / Math.max(0.1, zoom)).toFixed(4));
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Gesture tracking refs
@@ -789,7 +793,7 @@ export const MapView: React.FC<MapViewProps> = ({
               const opacity = Math.min(0.85, Math.max(0.40, 0.40 + ratio * 0.45));
 
               return (
-                <g key={`kingdom-title-${pl.id}`} transform={`translate(${cx}, ${cy})`}>
+                <g key={`kingdom-title-${pl.id}`} transform={`translate(${cx}, ${cy}) scale(${invZoom})`}>
                   <text
                     textAnchor="middle"
                     dominantBaseline="middle"
@@ -820,14 +824,14 @@ export const MapView: React.FC<MapViewProps> = ({
             {chokepointPaths.map((c) => (
               <g key={c.key}>
                 <path d={c.d} fill="none" stroke="#4c3f26" strokeWidth="3" strokeLinecap="round" />
-                <path
-                  d={`M ${c.glyphX - 5} ${c.glyphY + 4} L ${c.glyphX} ${c.glyphY - 5} L ${
-                    c.glyphX + 5
-                  } ${c.glyphY + 4} Z`}
-                  fill="#6b5f45"
-                  stroke="#1d1710"
-                  strokeWidth="0.75"
-                />
+                <g transform={`translate(${c.glyphX}, ${c.glyphY}) scale(${invZoom})`}>
+                  <path
+                    d="M -5 4 L 0 -5 L 5 4 Z"
+                    fill="#6b5f45"
+                    stroke="#1d1710"
+                    strokeWidth="0.75"
+                  />
+                </g>
               </g>
             ))}
           </g>
@@ -913,7 +917,7 @@ export const MapView: React.FC<MapViewProps> = ({
               return (
                 <g
                   key={`badge-${region.id}`}
-                  transform={`translate(${cx}, ${cy})`}
+                  transform={`translate(${cx}, ${cy}) scale(${invZoom})`}
                   className="troop-badge-group"
                   onClick={(e) => {
                     if (!hasMoved.current) {
@@ -1048,18 +1052,22 @@ export const MapView: React.FC<MapViewProps> = ({
               const c = map.regions[f.regionId]?.center;
               if (!c) return null;
               return (
-                <text
+                <g
                   key={f.id}
-                  x={c[0]}
-                  y={c[1] - 18}
-                  textAnchor="middle"
-                  className={`floater floater-${f.kind}`}
-                  fontSize="16"
-                  fontWeight="800"
-                  fontFamily="system-ui, -apple-system, sans-serif"
+                  transform={`translate(${c[0]}, ${c[1] - 18}) scale(${invZoom})`}
                 >
-                  {f.text}
-                </text>
+                  <text
+                    x="0"
+                    y="0"
+                    textAnchor="middle"
+                    className={`floater floater-${f.kind}`}
+                    fontSize="16"
+                    fontWeight="800"
+                    fontFamily="system-ui, -apple-system, sans-serif"
+                  >
+                    {f.text}
+                  </text>
+                </g>
               );
             })}
           </g>
