@@ -11,7 +11,7 @@ describe('Fog of War & Frontier Reconnaissance', () => {
     });
 
     const owned = game.map.regions.filter((_, i) => game.regionState[i].owner === 0);
-    expect(owned.length).toBe(43);
+    expect(owned.length).toBe(38);
 
     // 1. Every owned region MUST be VISIBLE
     owned.forEach((r) => {

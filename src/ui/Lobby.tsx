@@ -126,7 +126,7 @@ export const Lobby: React.FC<LobbyProps> = ({
             <span className="badge-ribbon-gold">Atlas</span>
           </div>
           <p className="card-description">
-            114 sıfır-drift əyalət və 9 tarixi krallıqla böyük qitə fəthi. Xəritəni canlı kəşf edərək hökmranlıq edəcəyin krallığı seç!
+            97 sıfır-drift əyalət və 9 tarixi krallıqla böyük qitə fəthi. Xəritəni canlı kəşf edərək hökmranlıq edəcəyin krallığı seç!
           </p>
 
           <button

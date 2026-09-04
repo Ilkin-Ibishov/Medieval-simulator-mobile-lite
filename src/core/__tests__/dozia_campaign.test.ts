@@ -4,9 +4,9 @@ import { computeBotActions } from '../../ai/bot';
 import { calculatePlayerIncome, calculatePlayerUpkeep } from '../rules';
 
 describe('Dozia Grand Campaign Mode', () => {
-  it('loads Dozia master map with 114 consolidated provinces and 9 kingdoms', () => {
+  it('loads Dozia master map with 97 consolidated provinces and 9 kingdoms', () => {
     const map = getDoziaMapData();
-    expect(map.regions.length).toBe(114);
+    expect(map.regions.length).toBe(97);
     expect(map.width).toBe(1536);
     expect(map.height).toBe(730);
 
@@ -31,7 +31,7 @@ describe('Dozia Grand Campaign Mode', () => {
     });
 
     expect(game.players.length).toBe(9);
-    expect(game.regionState.length).toBe(114);
+    expect(game.regionState.length).toBe(97);
 
     // Player 0 (chosen kingdom) is human
     expect(game.players[0].isAi).toBe(false);

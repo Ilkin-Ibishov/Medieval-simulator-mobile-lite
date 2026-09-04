@@ -56,9 +56,9 @@ describe('Map Generator Integrity & Topological Invariants', () => {
     }
   });
 
-  it('validates Dozia 114-province master map topological perfection', () => {
+  it('validates Dozia 97-province master map topological perfection', () => {
     const dozia = getDoziaMapData();
-    expect(dozia.regions).toHaveLength(114);
+    expect(dozia.regions).toHaveLength(97);
 
     for (const r of dozia.regions) {
       expect(r.neighbors.length).toBeGreaterThan(0);

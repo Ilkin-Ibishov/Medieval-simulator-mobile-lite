@@ -4,7 +4,7 @@ import { computeBotActions } from '../../ai/bot';
 import { RULES } from '../types';
 
 describe('Shattered Realm (Sındırılmış Dünya) Campaign Scenario', () => {
-  it('correctly initializes shattered realm with exactly 9 player capitals and 105 neutral baronies', () => {
+  it('correctly initializes shattered realm with exactly 9 player capitals and 88 neutral baronies', () => {
     const doziaMap = getDoziaMapData();
     const game = createGame({
       seed: 42424,
@@ -16,7 +16,7 @@ describe('Shattered Realm (Sındırılmış Dünya) Campaign Scenario', () => {
 
     expect(game.scenario).toBe('SHATTERED');
     expect(game.players.length).toBe(9);
-    expect(game.regionState.length).toBe(114);
+    expect(game.regionState.length).toBe(97);
 
     // Count owned vs neutral regions
     let ownedCount = 0;
@@ -37,7 +37,7 @@ describe('Shattered Realm (Sındırılmış Dünya) Campaign Scenario', () => {
     }
 
     expect(ownedCount).toBe(9);
-    expect(neutralCount).toBe(105);
+    expect(neutralCount).toBe(88);
 
     // Every player owns exactly 1 capital province
     for (let pIdx = 0; pIdx < 9; pIdx++) {

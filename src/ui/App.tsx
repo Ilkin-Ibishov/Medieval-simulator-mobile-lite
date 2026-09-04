@@ -13,7 +13,6 @@ import { DiplomacyModal } from './DiplomacyModal';
 import { BetrayalConfirmModal } from './BetrayalConfirmModal';
 import {
   CrownIcon,
-  CrossedSwordsIcon,
   SingleCoinIcon,
   PactScrollIcon,
   FeatherQuillIcon,
@@ -543,8 +542,13 @@ export const App: React.FC = () => {
     const currentStats = kingdomStatsMap.get(pickingKingdomId) || Array.from(kingdomStatsMap.values())[0];
     const allKingdomIds = Array.from(kingdomStatsMap.keys());
     const isShattered = selectedScenario === 'SHATTERED';
+    // Build clean stateId to player index map
+    const stateIdToPlayerIdx = new Map<number, number>();
+    allKingdomIds.forEach((sid, idx) => {
+      stateIdToPlayerIdx.set(sid, idx);
+    });
 
-    // Preview GameState with 10 players and zero fog
+    // Preview GameState with all 9 kingdoms and zero fog
     const previewGame: GameState = {
       seed: 12345,
       turn: 1,
@@ -563,15 +567,18 @@ export const App: React.FC = () => {
       map: doziaMap,
       regionState: doziaMap.regions.map((r) => {
         const isCap = r.isCapital;
+        const ownerIdx = r.stateId !== undefined && stateIdToPlayerIdx.has(r.stateId)
+          ? stateIdToPlayerIdx.get(r.stateId)!
+          : -1;
         if (isShattered) {
           return {
-            owner: isCap && r.stateId !== undefined ? r.stateId - 1 : -1,
+            owner: isCap ? ownerIdx : -1,
             troops: isCap ? 8 : 2,
             exhaustedTroops: 0,
           };
         }
         return {
-          owner: r.stateId !== undefined ? r.stateId - 1 : -1,
+          owner: ownerIdx,
           troops: isCap ? 7 : (r.income && r.income >= 10 ? 6 : 4),
           exhaustedTroops: 0,
         };
@@ -588,7 +595,7 @@ export const App: React.FC = () => {
         {/* Top Floating Guide & Scenario Switcher Bar */}
         <div className="realm-picker-topbar">
           <button
-            className="btn-picker-back"
+            className="btn btn-sm btn-ghost btn-back-lobby"
             onClick={() => {
               sounds.playClick();
               haptics.light();
@@ -598,45 +605,44 @@ export const App: React.FC = () => {
             ← Lobbi
           </button>
 
-          {/* Scenario Mode Switcher Tabs */}
-          <div className="realm-scenario-tabs">
+          <div className="scenario-switcher-chips">
             <button
-              className={`scenario-tab-btn ${selectedScenario === 'HEGEMONY' ? 'active' : ''}`}
+              className={`chip-scenario ${selectedScenario === 'HEGEMONY' ? 'active' : ''}`}
               onClick={() => {
                 sounds.playClick();
                 haptics.light();
                 setSelectedScenario('HEGEMONY');
               }}
             >
-              <CrownIcon size={13} /> Hegemonluq
+              👑 Hegemonluq
             </button>
             <button
-              className={`scenario-tab-btn ${selectedScenario === 'SHATTERED' ? 'active' : ''}`}
+              className={`chip-scenario ${selectedScenario === 'SHATTERED' ? 'active' : ''}`}
               onClick={() => {
                 sounds.playClick();
                 haptics.light();
                 setSelectedScenario('SHATTERED');
               }}
             >
-              <CrossedSwordsIcon size={13} /> Sındırılmış Dünya
+              ⚔️ Sındırılmış Dünya
             </button>
           </div>
         </div>
 
-        {/* Map Viewport in Realm Selection Mode */}
-        <main className="game-main-area">
-          <MapView
-            gameState={previewGame}
-            selectedRegion={null}
-            targetRegion={null}
-            onSelectRegion={() => {}}
-            isPickingRealm={true}
-            chosenKingdomId={pickingKingdomId}
-            onSelectKingdom={(kId) => {
-              setPickingKingdomId(kId);
-            }}
-          />
-        </main>
+        {/* Full Screen Interactive Master Map with Live Pan & Zoom */}
+        <MapView
+          gameState={previewGame}
+          selectedRegion={null}
+          targetRegion={null}
+          onSelectRegion={() => {}}
+          isPickingRealm={true}
+          chosenKingdomId={pickingKingdomId}
+          onSelectKingdom={(kingdomId) => {
+            sounds.playClick();
+            haptics.light();
+            setPickingKingdomId(kingdomId);
+          }}
+        />
 
         {/* Floating Bottom Realm Detail Sheet */}
         <RealmPickerSheet
@@ -646,7 +652,7 @@ export const App: React.FC = () => {
             handleStartGame({
               mode: 'CAMPAIGN',
               chosenKingdomId: pickingKingdomId,
-              regionCount: 114,
+              regionCount: 97,
               playerCount: 9,
               seed: Math.floor(Math.random() * 99999) + 1,
               maxTurns: 60,
