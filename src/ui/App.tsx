@@ -9,7 +9,6 @@ import { TurnReport } from './TurnReport';
 import { GameOverModal } from './GameOverModal';
 import { MultiplayerModal } from './MultiplayerModal';
 import { ExitConfirmModal } from './ExitConfirmModal';
-import { MockupView } from './MockupView';
 import { DiplomacyModal } from './DiplomacyModal';
 import { BetrayalConfirmModal } from './BetrayalConfirmModal';
 import {
@@ -73,15 +72,6 @@ export const App: React.FC = () => {
   const [isDiplomacyOpen, setIsDiplomacyOpen] = useState<boolean>(false);
   const [isMultiplayerModalOpen, setIsMultiplayerModalOpen] = useState<boolean>(false);
   const [isExitConfirmOpen, setIsExitConfirmOpen] = useState<boolean>(false);
-  const [isMockupOpen, setIsMockupOpen] = useState<boolean>(() => window.location.hash === '#mockup');
-
-  useEffect(() => {
-    const handleHash = () => {
-      setIsMockupOpen(window.location.hash === '#mockup');
-    };
-    window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
-  }, []);
 
   // Ref to hold latest state for async callbacks
   const stateRef = useRef<GameState | null>(null);
@@ -527,17 +517,6 @@ export const App: React.FC = () => {
     }
     return map;
   }, []);
-
-  if (isMockupOpen) {
-    return (
-      <MockupView
-        onBackToGame={() => {
-          window.location.hash = '';
-          setIsMockupOpen(false);
-        }}
-      />
-    );
-  }
 
   if (screen === 'LOBBY') {
     return (
