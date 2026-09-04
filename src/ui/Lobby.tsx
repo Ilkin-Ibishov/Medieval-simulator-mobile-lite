@@ -7,7 +7,6 @@ import {
   SoundIcon,
   HapticsIcon,
   DiceIcon,
-  SparklesIcon,
   CompassIcon,
   BannerFlagIcon,
 } from './Icons';
@@ -33,7 +32,6 @@ interface LobbyProps {
   onStartGame: (settings: GameSettings) => void;
   onOpenRealmPicker: () => void;
   onOpenMultiplayerModal: () => void;
-  onOpenMockup?: () => void;
 }
 
 export const Lobby: React.FC<LobbyProps> = ({
@@ -42,7 +40,6 @@ export const Lobby: React.FC<LobbyProps> = ({
   onStartGame,
   onOpenRealmPicker,
   onOpenMultiplayerModal,
-  onOpenMockup,
 }) => {
   const [regionCount, setRegionCount] = useState<number>(24);
   const [playerCount, setPlayerCount] = useState<number>(4);
@@ -231,30 +228,7 @@ export const Lobby: React.FC<LobbyProps> = ({
           </button>
         </div>
 
-        {/* Card 2: Interactive Map Mockup Demo */}
-        {onOpenMockup && (
-          <div
-            className="mode-card secondary-card"
-            onClick={onOpenMockup}
-          >
-            <div className="card-header-row">
-              <div className="card-icon-title">
-                <SparklesIcon size={20} className="text-gold" />
-                <h3 className="card-title-sm">
-                  Xəritə Vizual Mockup (Demo)
-                </h3>
-              </div>
-              <span className="badge-coming-soon badge-active">
-                Aktiv
-              </span>
-            </div>
-            <p className="card-description-sm">
-              Müstəqil interaktiv xəritə prototipini nəzərdən keçir: ada relyefi, dağlar, meşələr və mum möhürlər.
-            </p>
-          </div>
-        )}
-
-        {/* Card 3: Multiplayer Coming Soon */}
+        {/* Card 2: Multiplayer Coming Soon */}
         <div className="mode-card secondary-card" onClick={onOpenMultiplayerModal}>
           <div className="card-header-row">
             <div className="card-icon-title">

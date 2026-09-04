@@ -551,10 +551,6 @@ export const App: React.FC = () => {
             setScreen('REALM_PICKER');
           }}
           onOpenMultiplayerModal={() => setIsMultiplayerModalOpen(true)}
-          onOpenMockup={() => {
-            window.location.hash = '#mockup';
-            setIsMockupOpen(true);
-          }}
         />
         {isMultiplayerModalOpen && (
           <MultiplayerModal onClose={() => setIsMultiplayerModalOpen(false)} />
