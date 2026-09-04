@@ -394,7 +394,8 @@ export const MapView: React.FC<MapViewProps> = ({
 
   // Troop counts tween toward their new value instead of snapping. A province going
   // 7 -> 2 after a battle should read as an event, not as a silent relabel.
-  const displayedTroops = useAnimatedCounts(regionState.map((r) => r.troops));
+  const rawTroopCounts = React.useMemo(() => regionState.map((r) => r.troops), [regionState]);
+  const displayedTroops = useAnimatedCounts(rawTroopCounts);
 
   // Selected region neighbors for highlight
   const selectedNeighbors = React.useMemo(() => {
@@ -402,6 +403,88 @@ export const MapView: React.FC<MapViewProps> = ({
     const n = map.regions[selectedRegion]?.neighbors || [];
     return new Set<number>(n);
   }, [selectedRegion, map.regions]);
+
+  // Memoized combined coastal waterline path (1 combined path instead of 194 separate DOM nodes)
+  const combinedCoastalPathD = React.useMemo(() => {
+    let combined = '';
+    for (const r of map.regions) {
+      const p = regionPathsMap.get(r.id);
+      if (p) combined += (combined ? ' ' : '') + p;
+    }
+    return combined;
+  }, [map.regions, regionPathsMap]);
+
+  // Memoized region visibility array to eliminate duplicate calls across render passes
+  const visibilityMap = React.useMemo(() => {
+    if (isPickingRealm) return map.regions.map(() => 'VISIBLE' as const);
+    return map.regions.map((r) => getRegionVisibility(gameState, activePlayer, r.id));
+  }, [isPickingRealm, gameState, activePlayer, map.regions]);
+
+  // Memoized Floating Kingdom Titles (BFS cluster centroid computed only on state ownership change)
+  const floatingKingdomTitles = React.useMemo(() => {
+    return players
+      .map((pl) => {
+        if (!pl.isAlive) return null;
+        const owned = map.regions.filter((r) => regionState[r.id]?.owner === pl.id);
+        if (owned.length <= 1) return null;
+
+        const ownedSet = new Set(owned.map((r) => r.id));
+        const visited = new Set<number>();
+        let largestCluster: Region[] = [];
+
+        for (const r of owned) {
+          if (visited.has(r.id)) continue;
+          const cluster: Region[] = [];
+          const queue: number[] = [r.id];
+          visited.add(r.id);
+
+          while (queue.length > 0) {
+            const currId = queue.shift()!;
+            const currRegion = map.regions[currId];
+            if (currRegion) cluster.push(currRegion);
+
+            for (const nId of currRegion.neighbors) {
+              if (ownedSet.has(nId) && !visited.has(nId)) {
+                visited.add(nId);
+                queue.push(nId);
+              }
+            }
+          }
+
+          if (cluster.length > largestCluster.length) {
+            largestCluster = cluster;
+          }
+        }
+
+        if (largestCluster.length === 0) return null;
+
+        let sumX = 0;
+        let sumY = 0;
+        for (const r of largestCluster) {
+          sumX += r.center[0];
+          sumY += r.center[1];
+        }
+        const cx = sumX / largestCluster.length;
+        const cy = sumY / largestCluster.length;
+
+        const totalRegions = Math.max(1, map.regions.length);
+        const ratio = owned.length / totalRegions;
+        const fontSize = Math.min(42, Math.max(13, Math.round(12 + Math.sqrt(ratio) * 38)));
+        const letterSpacing = `${Math.min(14, Math.max(2.5, Math.round(2.5 + ratio * 16)))}px`;
+        const opacity = Math.min(0.85, Math.max(0.4, 0.4 + ratio * 0.45));
+
+        return {
+          id: pl.id,
+          name: pl.name.replace(' (Sən)', ''),
+          cx,
+          cy,
+          fontSize,
+          letterSpacing,
+          opacity,
+        };
+      })
+      .filter((t): t is NonNullable<typeof t> => t !== null);
+  }, [map.regions, regionState, players]);
 
   function polygonToPath(region: Region): string {
     if (region.svgPath) return region.svgPath;
@@ -621,40 +704,33 @@ export const MapView: React.FC<MapViewProps> = ({
             transformOrigin: `${map.width / 2}px ${map.height / 2}px`,
           }}
         >
-          {/* Coastal Waterline Glow Halo (Grand Strategy Sea Ripples) */}
+          {/* Coastal Waterline Glow Halo (Grand Strategy Sea Ripples - Single Path Optimization) */}
           <g className="coastal-waterlines-layer" pointerEvents="none">
-            {map.regions.map((region: Region) => {
-              const pathD = regionPathsMap.get(region.id) || polygonToPath(region);
-              return (
-                <React.Fragment key={`coastal-${region.id}`}>
-                  {/* Outer soft oceanic ripple */}
-                  <path
-                    d={pathD}
-                    fill="none"
-                    stroke="#1e3448"
-                    strokeWidth="8"
-                    strokeOpacity="0.45"
-                    strokeLinejoin="round"
-                    strokeLinecap="round"
-                  />
-                  {/* Inner crisp coastal waterline */}
-                  <path
-                    d={pathD}
-                    fill="none"
-                    stroke="#325370"
-                    strokeWidth="2.5"
-                    strokeOpacity="0.40"
-                    strokeLinejoin="round"
-                  />
-                </React.Fragment>
-              );
-            })}
+            {/* Outer soft oceanic ripple */}
+            <path
+              d={combinedCoastalPathD}
+              fill="none"
+              stroke="#1e3448"
+              strokeWidth="8"
+              strokeOpacity="0.45"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+            {/* Inner crisp coastal waterline */}
+            <path
+              d={combinedCoastalPathD}
+              fill="none"
+              stroke="#325370"
+              strokeWidth="2.5"
+              strokeOpacity="0.40"
+              strokeLinejoin="round"
+            />
           </g>
 
           {/* Region Polygons */}
           <g className="regions-layer">
             {map.regions.map((region: Region) => {
-              const visibility = isPickingRealm ? 'VISIBLE' : getRegionVisibility(gameState, activePlayer, region.id);
+              const visibility = visibilityMap[region.id];
               const isFogged = visibility === 'FOGGED';
               const isChosenKingdom = isPickingRealm && chosenKingdomId !== undefined && (region as any).stateId === chosenKingdomId;
               const isSelected = selectedRegion === region.id || isChosenKingdom;
@@ -735,87 +811,31 @@ export const MapView: React.FC<MapViewProps> = ({
             })}
           </g>
 
-          {/* Dynamic Floating Kingdom Titles Layer */}
+          {/* Dynamic Floating Kingdom Titles Layer (Pre-computed BFS Centroids) */}
           <g className="floating-kingdom-titles-layer" pointerEvents="none">
-            {players.map((pl) => {
-              if (!pl.isAlive) return null;
-              const owned = map.regions.filter((r) => regionState[r.id]?.owner === pl.id);
-              if (owned.length <= 1) return null; // Avoid clutter on 1-province rump realms
-
-              // Find largest contiguous landmass cluster via BFS to avoid split-realm drift
-              const ownedSet = new Set(owned.map((r) => r.id));
-              const visited = new Set<number>();
-              let largestCluster: Region[] = [];
-
-              for (const r of owned) {
-                if (visited.has(r.id)) continue;
-                const cluster: Region[] = [];
-                const queue: number[] = [r.id];
-                visited.add(r.id);
-
-                while (queue.length > 0) {
-                  const currId = queue.shift()!;
-                  const currRegion = map.regions[currId];
-                  if (currRegion) cluster.push(currRegion);
-
-                  for (const nId of currRegion.neighbors) {
-                    if (ownedSet.has(nId) && !visited.has(nId)) {
-                      visited.add(nId);
-                      queue.push(nId);
-                    }
-                  }
-                }
-
-                if (cluster.length > largestCluster.length) {
-                  largestCluster = cluster;
-                }
-              }
-
-              if (largestCluster.length === 0) return null;
-
-              // Compute centroid of the largest contiguous cluster
-              let sumX = 0;
-              let sumY = 0;
-              for (const r of largestCluster) {
-                sumX += r.center[0];
-                sumY += r.center[1];
-              }
-              const cx = sumX / largestCluster.length;
-              const cy = sumY / largestCluster.length;
-
-              // Relative dominance ratio against total map regions
-              const totalRegions = Math.max(1, map.regions.length);
-              const ratio = owned.length / totalRegions;
-
-              // Proportional typography: font size, letter-spacing, and opacity scale with map share
-              const fontSize = Math.min(42, Math.max(13, Math.round(12 + Math.sqrt(ratio) * 38)));
-              const letterSpacing = `${Math.min(14, Math.max(2.5, Math.round(2.5 + ratio * 16)))}px`;
-              const opacity = Math.min(0.85, Math.max(0.40, 0.40 + ratio * 0.45));
-
-              return (
-                <g key={`kingdom-title-${pl.id}`} transform={`translate(${cx}, ${cy}) scale(${invZoom})`}>
-                  <text
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fill="#f6ebd2"
-                    stroke="#1a140d"
-                    strokeWidth={fontSize > 24 ? 3.5 : 2.5}
-                    paintOrder="stroke"
-                    opacity={opacity}
-                    fontSize={fontSize}
-                    fontFamily="'Noto Serif', Georgia, serif"
-                    fontWeight="bold"
-                    letterSpacing={letterSpacing}
-                    style={{
-                      textTransform: 'uppercase',
-                      pointerEvents: 'none',
-                    }}
-                  >
-                    {pl.name.replace(' (Sən)', '')}
-                  </text>
-                </g>
-              );
-            })}
+            {floatingKingdomTitles.map((t) => (
+              <g key={`kingdom-title-${t.id}`} transform={`translate(${t.cx}, ${t.cy}) scale(${invZoom})`}>
+                <text
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fill="#f6ebd2"
+                  stroke="#1a140d"
+                  strokeWidth={t.fontSize > 24 ? 3.5 : 2.5}
+                  paintOrder="stroke"
+                  opacity={t.opacity}
+                  fontSize={t.fontSize}
+                  fontFamily="'Noto Serif', Georgia, serif"
+                  fontWeight="bold"
+                  letterSpacing={t.letterSpacing}
+                  style={{
+                    textTransform: 'uppercase',
+                    pointerEvents: 'none',
+                  }}
+                >
+                  {t.name}
+                </text>
+              </g>
+            ))}
           </g>
 
           {/* Chokepoint borders — cosmetic mountain/river markers on the map's
@@ -901,7 +921,7 @@ export const MapView: React.FC<MapViewProps> = ({
           {/* Troop Badges & Labels Layer */}
           <g className="troops-layer">
             {map.regions.map((region: Region) => {
-              const visibility = getRegionVisibility(gameState, activePlayer, region.id);
+              const visibility = visibilityMap[region.id];
               const isFogged = visibility === 'FOGGED';
               if (isFogged) return null;
 
