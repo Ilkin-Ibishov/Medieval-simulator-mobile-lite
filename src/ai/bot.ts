@@ -62,7 +62,7 @@ export function computeBotActions(
   const currentUpkeep = calculatePlayerUpkeep(state, botId);
   const currentMargin = projectedIncome - currentUpkeep;
 
-  // Find most threatened border region to reinforce
+  // Find most threatened border region to reinforce (only count hostile kingdoms, not passive neutrals)
   let mostThreatenedRegion = ownedRegions[0];
   let maxThreat = -1;
 
@@ -71,7 +71,7 @@ export function computeBotActions(
     const neighbors = state.map.regions[r].neighbors;
     for (const n of neighbors) {
       const nState = state.regionState[n];
-      if (nState.owner !== botId) {
+      if (nState.owner >= 0 && nState.owner !== botId) {
         threat += nState.troops + 1;
       }
     }
@@ -90,9 +90,12 @@ export function computeBotActions(
     }
   }
 
-  // Hire if we have gold and income margin is reasonable
+  // Hire if we have gold and income margin is reasonable (or in early expansion / 1-province starts)
   const maxAffordableUnits = Math.floor(virtualTreasury / RULES.unitCost);
-  const upkeepMarginThreshold = -RULES.unitUpkeep * 2 * (personality.greed || 1.0);
+  const upkeepMarginThreshold = ownedRegions.length <= 2
+    ? -RULES.unitUpkeep * 6
+    : -RULES.unitUpkeep * 2 * (personality.greed || 1.0);
+
   if (maxAffordableUnits > 0 && currentMargin >= upkeepMarginThreshold) {
     const unitsToHire = Math.min(maxAffordableUnits, Math.max(1, Math.min(4, Math.floor(maxAffordableUnits / 2) + 1)));
     if (unitsToHire > 0) {
@@ -167,9 +170,21 @@ export function computeBotActions(
   const isBorder = (r: number): boolean =>
     state.map.regions[r].neighbors.some((n) => state.regionState[n].owner !== botId);
 
+  const hasHostileNeighbor = (r: number): boolean =>
+    state.map.regions[r].neighbors.some((n) => {
+      const o = state.regionState[n].owner;
+      return o >= 0 && o !== botId;
+    });
+
   const committableTroops = (r: number): number => {
     const ready = getReadyTroops(state, r);
     if (!isBorder(r)) return ready;
+
+    // In Shattered Realm opening (1-2 provinces), commit maximum army to claim neutral baronies
+    if (state.scenario === 'SHATTERED' && ownedRegions.length <= 2 && !hasHostileNeighbor(r)) {
+      return Math.max(0, ready - 1);
+    }
+
     const isOwnCapital = r === player.capital;
     const effectiveGarrison = Math.max(
       2,
@@ -248,7 +263,10 @@ export function computeBotActions(
         continue;
       }
 
-      const preview = previewCombat(currAvailable, targetState.troops);
+      const preview = previewCombat(currAvailable, targetState.troops, {
+        isCapital: state.map.regions[to].isCapital,
+        hasFort: targetState.building === 'FORT',
+      });
       if (preview.willWin && preview.attackerSurviving >= 1) {
         actions.push({
           type: 'MOVE',

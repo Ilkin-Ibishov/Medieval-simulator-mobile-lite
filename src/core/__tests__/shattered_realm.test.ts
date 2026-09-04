@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { createGame, getDoziaMapData, applyAction } from '../index';
+import { createGame, getDoziaMapData, applyAction, resolveRound } from '../index';
+import { computeBotActions } from '../../ai/bot';
 import { RULES } from '../types';
 
 describe('Shattered Realm (Sındırılmış Dünya) Campaign Scenario', () => {
@@ -72,5 +73,39 @@ describe('Shattered Realm (Sındırılmış Dünya) Campaign Scenario', () => {
 
     expect(afterMove.regionState[neutralNeighbor!].owner).toBe(0);
     expect(afterMove.regionState[neutralNeighbor!].troops).toBeGreaterThanOrEqual(1);
+  });
+
+  it('guarantees AI bots actively expand and conquer neutral baronies in simultaneous rounds', () => {
+    const doziaMap = getDoziaMapData();
+    let current = createGame({
+      seed: 99911,
+      mapData: doziaMap,
+      scenario: 'SHATTERED',
+      chosenKingdomId: 10,
+      fogOfWar: false,
+    });
+
+    // Run 3 simultaneous rounds where bots compute their actions
+    for (let round = 1; round <= 3; round++) {
+      const orders: Record<number, any[]> = { 0: [] };
+      for (const p of current.players) {
+        if (p.isAi && p.isAlive) {
+          const view = { ...current, activePlayer: p.id };
+          orders[p.id] = computeBotActions(view, p.id);
+        }
+      }
+      current = resolveRound(current, orders);
+    }
+
+    // After 3 rounds, AI bots should have conquered multiple neutral provinces
+    let totalBotProvinces = 0;
+    for (const r of current.regionState) {
+      if (r.owner > 0) {
+        totalBotProvinces++;
+      }
+    }
+
+    // 9 AI kingdoms initially owned 9 provinces. They should now own significantly more (> 12)
+    expect(totalBotProvinces).toBeGreaterThan(12);
   });
 });

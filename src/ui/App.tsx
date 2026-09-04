@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { GameState, Action, PlayerId, createGame, applyAction, resolveRound, RoundOrders, getDoziaMapData } from '../core';
+import { GameState, Action, PlayerId, createGame, applyAction, resolveRound, RoundOrders, getDoziaMapData, hasActivePact, RULES } from '../core';
 import { computeBotActions } from '../ai/bot';
 import { calculateNetGold } from '../core/rules';
 import { Lobby, GameSettings } from './Lobby';
@@ -11,6 +11,7 @@ import { MultiplayerModal } from './MultiplayerModal';
 import { ExitConfirmModal } from './ExitConfirmModal';
 import { MockupView } from './MockupView';
 import { DiplomacyModal } from './DiplomacyModal';
+import { BetrayalConfirmModal } from './BetrayalConfirmModal';
 import {
   CrownIcon,
   CrossedSwordsIcon,
@@ -47,6 +48,8 @@ export const App: React.FC = () => {
 
   // Simultaneous Planned Orders for the current round
   const [pendingOrders, setPendingOrders] = useState<Action[]>([]);
+  // Pending betrayal action that requires confirmation before queueing
+  const [pendingBetrayalAction, setPendingBetrayalAction] = useState<Action | null>(null);
 
   // Selection state
   const [selectedRegion, setSelectedRegion] = useState<number | null>(null);
@@ -168,6 +171,10 @@ export const App: React.FC = () => {
 
   // Hardware Back Button Handler
   useHardwareBack(() => {
+    if (pendingBetrayalAction !== null) {
+      setPendingBetrayalAction(null);
+      return true;
+    }
     if (isExitConfirmOpen) {
       setIsExitConfirmOpen(false);
       return true;
@@ -223,12 +230,33 @@ export const App: React.FC = () => {
       pushFloater(action.regionId, `+${action.count}`, 'gain');
       setSelectedRegion(null);
       setTargetRegion(null);
+    } else if (action.type === 'BUILD') {
+      setPendingOrders((prev) => {
+        const filtered = prev.filter((o) => !(o.type === 'BUILD' && o.regionId === action.regionId));
+        return [...filtered, action];
+      });
+      sounds.playHire();
+      haptics.medium();
+      setSelectedRegion(null);
+      setTargetRegion(null);
     } else if (action.type === 'DISBAND') {
       setPendingOrders((prev) => [...prev, action]);
       pushFloater(action.regionId, `-${action.count}`, 'loss');
       setSelectedRegion(null);
       setTargetRegion(null);
     } else if (action.type === 'MOVE') {
+      const currentGState = stateRef.current;
+      if (currentGState) {
+        const toState = currentGState.regionState[action.to];
+        if (toState && toState.owner !== undefined && toState.owner >= 0 && toState.owner !== currentGState.activePlayer) {
+          const allyId = toState.owner;
+          if (hasActivePact(currentGState, currentGState.activePlayer, allyId)) {
+            setPendingBetrayalAction(action);
+            return;
+          }
+        }
+      }
+
       setPendingOrders((prev) => {
         const existing = prev.find(
           (o) => o.type === 'MOVE' && o.from === action.from && o.to === action.to
@@ -242,8 +270,45 @@ export const App: React.FC = () => {
       });
       setSelectedRegion(null);
       setTargetRegion(null);
+    } else if (action.type === 'PROPOSE_PACT' || action.type === 'SEND_TRIBUTE' || action.type === 'BREAK_PACT') {
+      setPendingOrders((prev) => {
+        const filtered = prev.filter(
+          (o) => !(o.type === action.type && (o as any).targetPlayer === (action as any).targetPlayer)
+        );
+        return [...filtered, action];
+      });
+      sounds.playClick();
+      haptics.medium();
+      setSelectedRegion(null);
+      setTargetRegion(null);
     }
   }, [pushFloater]);
+
+  const handleConfirmBetrayal = () => {
+    if (!pendingBetrayalAction || pendingBetrayalAction.type !== 'MOVE') return;
+    const action = pendingBetrayalAction;
+    setPendingBetrayalAction(null);
+
+    setPendingOrders((prev) => {
+      const existing = prev.find(
+        (o) => o.type === 'MOVE' && o.from === action.from && o.to === action.to
+      );
+      if (existing && existing.type === 'MOVE') {
+        return prev.map((o) =>
+          o === existing ? { ...o, count: existing.count + action.count } : o
+        );
+      }
+      return [...prev, action];
+    });
+    sounds.playMarch();
+    haptics.heavy();
+    setSelectedRegion(null);
+    setTargetRegion(null);
+  };
+
+  const handleCancelBetrayal = () => {
+    setPendingBetrayalAction(null);
+  };
 
   // Cancel a planned queued order
   const handleCancelQueuedOrder = useCallback((actionToCancel: Action) => {
@@ -627,10 +692,14 @@ export const App: React.FC = () => {
 
   const humanPlayer = gameState.players[0];
   const netIncome = calculateNetGold(gameState, 0);
-  const pendingHireCost = pendingOrders
-    .filter((o) => o.type === 'HIRE')
-    .reduce((sum, o) => sum + (o.type === 'HIRE' ? o.count * 10 : 0), 0);
-  const displayTreasury = Math.max(0, humanPlayer.treasury - pendingHireCost);
+  const pendingSpentGold = pendingOrders.reduce((sum, o) => {
+    if (o.type === 'HIRE') return sum + o.count * RULES.unitCost;
+    if (o.type === 'BUILD') return sum + (o.building === 'FORT' ? RULES.fortCost : RULES.watchtowerCost);
+    if (o.type === 'PROPOSE_PACT') return sum + RULES.pactCost;
+    if (o.type === 'SEND_TRIBUTE') return sum + RULES.tributeCost;
+    return sum;
+  }, 0);
+  const displayTreasury = Math.max(0, humanPlayer.treasury - pendingSpentGold);
 
   return (
     <div className="game-container">
@@ -725,6 +794,10 @@ export const App: React.FC = () => {
               setSelectedRegion(null);
               setTargetRegion(null);
             }}
+            onRequestBetrayal={(act) => setPendingBetrayalAction(act)}
+            onOpenDiplomacy={() => setIsDiplomacyOpen(true)}
+            onProposePact={(targetPlayerId) => handleQueueAction({ type: 'PROPOSE_PACT', targetPlayer: targetPlayerId })}
+            onSendTribute={(targetPlayerId) => handleQueueAction({ type: 'SEND_TRIBUTE', targetPlayer: targetPlayerId })}
           />
         )}
       </main>
@@ -767,6 +840,16 @@ export const App: React.FC = () => {
             setScreen('LOBBY');
           }}
           onCancel={() => setIsExitConfirmOpen(false)}
+        />
+      )}
+
+      {/* Betrayal Confirmation Modal */}
+      {pendingBetrayalAction && (
+        <BetrayalConfirmModal
+          gameState={gameState}
+          pendingAttack={pendingBetrayalAction}
+          onConfirm={handleConfirmBetrayal}
+          onCancel={handleCancelBetrayal}
         />
       )}
 

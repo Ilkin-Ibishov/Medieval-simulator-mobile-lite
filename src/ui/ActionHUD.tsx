@@ -1,47 +1,72 @@
 import React, { useState, useEffect } from 'react';
-import { GameState, Action, RULES } from '../core/types';
-import { getReadyTroops, previewCombat, getRegionVisibility } from '../core/rules';
 import {
-  SwordIcon,
-  CrossedSwordsIcon,
+  GameState,
+  Action,
+  RULES,
+} from '../core/types';
+import {
+  previewCombat,
+  getReadyTroops,
+  getRegionVisibility,
+  hasActivePact,
+  getDiplomaticRelation,
+  canProposePact,
+  canSendTribute,
+  getOwnedRegionCount,
+  calculatePlayerTroopCount,
+} from '../core/rules';
+import { DOZIA_KINGDOMS_METADATA } from '../data/maps/dozia_native_provinces';
+import {
   ShieldIcon,
-  SingleCoinIcon,
   FortressIcon,
   WatchtowerIcon,
+  CrossedSwordsIcon,
+  SingleCoinIcon,
   CrownIcon,
-  FeatherQuillIcon,
+  PactScrollIcon,
+  TributeIcon,
   CompassIcon,
   WarningSealIcon,
+  FeatherQuillIcon,
+  UsersIcon,
 } from './Icons';
 import { sounds } from './sound';
 import { haptics } from './haptics';
 
 interface ActionHUDProps {
   gameState: GameState;
-  selectedRegion: number | null;
+  selectedRegion: number;
   targetRegion: number | null;
   queuedOrders?: Action[];
   onApplyAction: (action: Action) => void;
   onCancelQueuedOrder?: (action: Action) => void;
   onSelectTargetRegion: (regionId: number | null) => void;
   onDeselect: () => void;
+  onRequestBetrayal?: (action: Action) => void;
+  onOpenDiplomacy?: (targetPlayerId?: number) => void;
+  onProposePact?: (targetPlayerId: number) => void;
+  onSendTribute?: (targetPlayerId: number) => void;
 }
 
 export const ActionHUD: React.FC<ActionHUDProps> = ({
   gameState,
   selectedRegion,
   targetRegion,
-  queuedOrders,
+  queuedOrders = [],
   onApplyAction,
   onCancelQueuedOrder,
   onSelectTargetRegion,
   onDeselect,
+  onRequestBetrayal,
+  onOpenDiplomacy,
+  onProposePact,
+  onSendTribute,
 }) => {
-  if (selectedRegion === null) return null;
-
-  const { regionState, map, players, activePlayer } = gameState;
+  const { map, regionState, players, activePlayer } = gameState;
   const currentRegion = map.regions[selectedRegion];
   const currentRState = regionState[selectedRegion];
+  if (!currentRegion || !currentRState) return null;
+
   const player = players[activePlayer];
   const isOwned = currentRState?.owner === activePlayer;
   const visibility = getRegionVisibility(gameState, activePlayer, selectedRegion);
@@ -53,13 +78,19 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
       ?.filter((o) => o.type === 'MOVE' && o.from === selectedRegion)
       .reduce((sum, o) => sum + (o.type === 'MOVE' ? o.count : 0), 0) ?? 0;
 
-  // Account for gold spent on pending recruitment
-  const queuedHireCost =
-    queuedOrders
-      ?.filter((o) => o.type === 'HIRE')
-      .reduce((sum, o) => sum + (o.type === 'HIRE' ? o.count * RULES.unitCost : 0), 0) ?? 0;
+  // Account for all gold committed in queued orders
+  const queuedGoldSpent =
+    queuedOrders?.reduce((sum, o) => {
+      if (o.type === 'HIRE') return sum + o.count * RULES.unitCost;
+      if (o.type === 'BUILD') {
+        return sum + (o.building === 'FORT' ? RULES.fortCost : o.building === 'WATCHTOWER' ? RULES.watchtowerCost : 0);
+      }
+      if (o.type === 'PROPOSE_PACT') return sum + RULES.pactCost;
+      if (o.type === 'SEND_TRIBUTE') return sum + RULES.tributeCost;
+      return sum;
+    }, 0) ?? 0;
 
-  const effectiveTreasury = Math.max(0, player.treasury - queuedHireCost);
+  const effectiveTreasury = Math.max(0, player.treasury - queuedGoldSpent);
   const maxAffordable = Math.floor(effectiveTreasury / RULES.unitCost);
 
   // Available ready troops (excluding newly hired, moved units, and already queued departures)
@@ -76,10 +107,24 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
   const targetR = targetRegion !== null ? map.regions[targetRegion] : null;
   const targetRState = targetRegion !== null ? regionState[targetRegion] : null;
   const isFriendlyTarget = targetRState?.owner === activePlayer;
+  const isAllyTarget =
+    targetRState &&
+    targetRState.owner >= 0 &&
+    targetRState.owner !== activePlayer &&
+    hasActivePact(gameState, activePlayer, targetRState.owner);
 
-  // Pending moves from this region
-  const pendingMovesFromHere =
-    queuedOrders?.filter((o) => o.type === 'MOVE' && o.from === selectedRegion) ?? [];
+  // Pending orders related to this region
+  const pendingOrdersForHere = queuedOrders.filter(
+    (o) =>
+      (o.type === 'MOVE' && o.from === selectedRegion) ||
+      (o.type === 'HIRE' && o.regionId === selectedRegion) ||
+      (o.type === 'BUILD' && o.regionId === selectedRegion) ||
+      (o.type === 'DISBAND' && o.regionId === selectedRegion)
+  );
+
+  const queuedBuild = queuedOrders.find(
+    (o) => o.type === 'BUILD' && o.regionId === selectedRegion
+  );
 
   // Combat preview
   const combatPreview =
@@ -110,20 +155,37 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
     });
   };
 
+  const handleBuild = (building: 'FORT' | 'WATCHTOWER') => {
+    sounds.playHire();
+    haptics.medium();
+    onApplyAction({
+      type: 'BUILD',
+      regionId: selectedRegion,
+      building,
+    });
+  };
+
   const handleExecuteMove = () => {
     if (targetRegion === null || moveCount <= 0) return;
+    const moveAction: Action = {
+      type: 'MOVE',
+      from: selectedRegion,
+      to: targetRegion,
+      count: moveCount,
+    };
+
+    if (isAllyTarget && onRequestBetrayal) {
+      onRequestBetrayal(moveAction);
+      return;
+    }
+
     if (isFriendlyTarget) {
       sounds.playMarch();
       haptics.medium();
     } else {
       haptics.heavy();
     }
-    onApplyAction({
-      type: 'MOVE',
-      from: selectedRegion,
-      to: targetRegion,
-      count: moveCount,
-    });
+    onApplyAction(moveAction);
   };
 
   // Slider percentage calculation for visual track fill
@@ -132,6 +194,16 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
       ? Math.round((moveCount / availableToMove) * 100)
       : 0;
 
+  // Foreign owner info (for unowned inspection)
+  const foreignOwnerId = currentRState.owner;
+  const foreignOwner = foreignOwnerId >= 0 ? players[foreignOwnerId] : null;
+  const foreignMeta = foreignOwner ? DOZIA_KINGDOMS_METADATA[foreignOwner.id + 1] : null;
+  const foreignRel = foreignOwner ? getDiplomaticRelation(gameState, activePlayer, foreignOwner.id) : null;
+  const foreignPactCheck = foreignOwner ? canProposePact(gameState, activePlayer, foreignOwner.id) : null;
+  const foreignTributeCheck = foreignOwner ? canSendTribute(gameState, activePlayer, foreignOwner.id) : null;
+  const foreignOwnedProvinces = foreignOwner ? getOwnedRegionCount(gameState, foreignOwner.id) : 0;
+  const foreignTotalTroops = foreignOwner ? calculatePlayerTroopCount(gameState, foreignOwner.id) : 0;
+
   return (
     <div className="action-hud-floating war-command-slab">
       {/* HUD Header */}
@@ -139,36 +211,50 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
         <div className="hud-title-group">
           <div className="hud-crest-icon">
             {isOwned ? (
-              <CrownIcon size={18} className="text-gold" />
-            ) : isFogged ? (
-              <CompassIcon size={18} className="text-muted" />
+              <CrownIcon size={18} color="#d9a43a" />
+            ) : currentRegion.isCapital ? (
+              <CrownIcon size={18} color={foreignOwner?.color || '#ef4444'} />
             ) : (
-              <SwordIcon size={18} className="text-red" />
+              <ShieldIcon size={18} color={foreignOwner?.color || '#a99878'} />
             )}
           </div>
           <div>
-            <span className="hud-region-name">{currentRegion.name}</span>
-            <div className="hud-badge-row">
-              <span className="hud-status-pill">
-                {isOwned ? 'Mülk' : isFogged ? 'Duman' : 'Düşmən'}
-              </span>
+            <div className="hud-province-title">
+              <strong>{currentRegion.name}</strong>
+              {currentRegion.isCapital && (
+                <span className="badge-capital-gold">
+                  <CrownIcon size={10} color="#f59e0b" /> PAYTAXT
+                </span>
+              )}
+            </div>
+            <div className="hud-province-meta">
               <span className="hud-stat-item">
-                <ShieldIcon size={12} /> {isFogged ? '?' : currentRState.troops} Qoşun
-                {isOwned && currentRState.exhaustedTroops > 0 && (
-                  <span className="text-muted" style={{ marginLeft: 3 }}>
-                    ({availableToMove} hazır)
+                <ShieldIcon size={12} />
+                {isFogged ? '?' : currentRState.troops + ' əsgər'}
+                {isOwned && baseReady < currentRState.troops && (
+                  <span className="text-xs text-muted" title="Hazır hərbi qüvvə">
+                    {' '}({baseReady} hazır)
                   </span>
                 )}
               </span>
               <span className="hud-stat-item text-gold">
                 <SingleCoinIcon size={12} /> +{isFogged ? '?' : currentRegion.income}G
               </span>
-              {currentRState.building && (
+              {currentRState.building && currentRState.building !== 'NONE' && (
                 <span className="hud-stat-item hud-building-tag">
                   {currentRState.building === 'FORT' ? (
                     <><FortressIcon size={12} /> Qala</>
                   ) : (
                     <><WatchtowerIcon size={12} /> Qüllə</>
+                  )}
+                </span>
+              )}
+              {queuedBuild && queuedBuild.type === 'BUILD' && (
+                <span className="hud-stat-item text-gold">
+                  {queuedBuild.building === 'FORT' ? (
+                    <><FortressIcon size={12} /> +Qala (Plan)</>
+                  ) : (
+                    <><WatchtowerIcon size={12} /> +Qüllə (Plan)</>
                   )}
                 </span>
               )}
@@ -201,7 +287,7 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
             </button>
             {maxAffordable > 3 && (
               <button
-                className="btn btn-secondary btn-sm"
+                className="btn btn-primary btn-sm"
                 onClick={() => handleHire(maxAffordable)}
               >
                 Maks ({maxAffordable})
@@ -219,38 +305,30 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
 
           {/* Tactical Fortifications Row */}
           <div className="hud-action-row" style={{ marginTop: 6 }}>
-            {currentRState.building === 'FORT' ? (
+            {currentRState.building === 'FORT' || (queuedBuild?.type === 'BUILD' && queuedBuild.building === 'FORT') ? (
               <span className="badge-ribbon-gold">
-                <FortressIcon size={13} /> Qala Aktiv (+2 Müdafiə)
+                <FortressIcon size={13} /> Qala {queuedBuild ? '(Planlaşdırılıb)' : 'Aktiv (+2 Müdafiə)'}
               </span>
             ) : (
               <button
                 className="btn btn-secondary btn-sm"
                 disabled={effectiveTreasury < RULES.fortCost}
-                onClick={() => {
-                  sounds.playHire();
-                  haptics.medium();
-                  onApplyAction({ type: 'BUILD', regionId: selectedRegion, building: 'FORT' });
-                }}
+                onClick={() => handleBuild('FORT')}
                 title="Qala: Müdafiə olunan qoşunlara +2 döyüş gücü verir"
               >
                 <FortressIcon size={13} /> Qala ({RULES.fortCost}G)
               </button>
             )}
 
-            {currentRState.building === 'WATCHTOWER' ? (
+            {currentRState.building === 'WATCHTOWER' || (queuedBuild?.type === 'BUILD' && queuedBuild.building === 'WATCHTOWER') ? (
               <span className="badge-ribbon-primary">
-                <WatchtowerIcon size={13} /> Qüllə Aktiv (2-hop)
+                <WatchtowerIcon size={13} /> Qüllə {queuedBuild ? '(Planlaşdırılıb)' : 'Aktiv (2-hop)'}
               </span>
             ) : (
               <button
                 className="btn btn-secondary btn-sm"
                 disabled={effectiveTreasury < RULES.watchtowerCost}
-                onClick={() => {
-                  sounds.playHire();
-                  haptics.medium();
-                  onApplyAction({ type: 'BUILD', regionId: selectedRegion, building: 'WATCHTOWER' });
-                }}
+                onClick={() => handleBuild('WATCHTOWER')}
                 title="Müşahidə Qülləsi: Dumanı 2 qat dərinliyinə açır"
               >
                 <WatchtowerIcon size={13} /> Qüllə ({RULES.watchtowerCost}G)
@@ -259,20 +337,31 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
           </div>
 
           {/* Pending Planned Orders from this province */}
-          {pendingMovesFromHere.length > 0 && (
+          {pendingOrdersForHere.length > 0 && (
             <div className="hud-pending-orders-list">
               <span className="text-xs text-muted">
-                <FeatherQuillIcon size={12} /> Planlaşdırılmış Yürüşlər:
+                <FeatherQuillIcon size={12} /> Planlaşdırılmış Əmrlər:
               </span>
-              {pendingMovesFromHere.map((pm, idx) => (
-                <div key={`pm-${idx}`} className="hud-pending-order-chip">
+              {pendingOrdersForHere.map((po, idx) => (
+                <div key={'po-' + idx} className="hud-pending-order-chip">
                   <span>
-                    ➔ {map.regions[pm.type === 'MOVE' ? pm.to : 0].name} ({pm.type === 'MOVE' ? pm.count : 0} əsgər)
+                    {po.type === 'MOVE' && (
+                      <>➔ {map.regions[po.to].name} ({po.count} əsgər)</>
+                    )}
+                    {po.type === 'HIRE' && (
+                      <>+ {po.count} Əsgər Yığımı ({po.count * RULES.unitCost}G)</>
+                    )}
+                    {po.type === 'BUILD' && (
+                      <>{po.building === 'FORT' ? '🏰 Qala Tikintisi' : '🗼 Qüllə Tikintisi'} ({po.building === 'FORT' ? RULES.fortCost : RULES.watchtowerCost}G)</>
+                    )}
+                    {po.type === 'DISBAND' && (
+                      <>- {po.count} Əsgər Tərxis</>
+                    )}
                   </span>
                   {onCancelQueuedOrder && (
                     <button
                       className="btn-xs btn-pill"
-                      onClick={() => onCancelQueuedOrder(pm)}
+                      onClick={() => onCancelQueuedOrder(po)}
                       title="Ləğv et"
                     >
                       ✕
@@ -301,11 +390,13 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
           <div className="hud-target-row">
             <div className="hud-target-badge">
               {isFriendlyTarget ? (
-                <ShieldIcon size={16} className="text-blue" />
+                <ShieldIcon size={16} color="#60a5fa" />
+              ) : isAllyTarget ? (
+                <WarningSealIcon size={16} color="#ef4444" />
               ) : (
-                <CrossedSwordsIcon size={16} className="text-red" />
+                <CrossedSwordsIcon size={16} color="#f87171" />
               )}
-              <strong>{isFriendlyTarget ? 'Köçür ➔ ' : 'Hücum ➔ '}</strong>
+              <strong>{isFriendlyTarget ? 'Köçür ➔ ' : isAllyTarget ? 'Xain Hücum ➔ ' : 'Hücum ➔ '}</strong>
               <span>
                 {targetR.name} ({targetRState.troops} əsgər)
               </span>
@@ -317,6 +408,16 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
               ← Dəyiş
             </button>
           </div>
+
+          {/* Treason warning alert for ally attacks */}
+          {isAllyTarget && (
+            <div className="hud-betrayal-alert">
+              <WarningSealIcon size={14} color="#ef4444" />
+              <span>
+                <strong>Diqqət:</strong> Müttəfiq Paktı Pozulacaq! (-{RULES.betrayalPenalty}G Cərimə)
+              </span>
+            </div>
+          )}
 
           {/* Troop Allocation Stepper & Slider */}
           <div className="hud-slider-box">
@@ -349,7 +450,10 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
                   setMoveCount(parseInt(e.target.value, 10));
                   haptics.light();
                 }}
-                className="range-slider"
+                className="hud-slider-input"
+                style={{
+                  background: 'linear-gradient(to right, #d9a43a 0%, #d9a43a ' + sliderPercentage + '%, #2e261b ' + sliderPercentage + '%, #2e261b 100%)',
+                }}
               />
 
               <button
@@ -362,55 +466,46 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
               >
                 +
               </button>
+            </div>
 
-              <div className="hud-quick-pills">
-                <button
-                  className="btn-pill btn-xs"
-                  disabled={availableToMove <= 0}
-                  onClick={() => setMoveCount(1)}
-                >
-                  1
-                </button>
-                <button
-                  className="btn-pill btn-xs"
-                  disabled={availableToMove <= 1}
-                  onClick={() =>
-                    setMoveCount(Math.max(1, Math.round(availableToMove * 0.5)))
-                  }
-                >
-                  50%
-                </button>
-                <button
-                  className="btn-pill btn-xs"
-                  disabled={availableToMove <= 0}
-                  onClick={() => setMoveCount(availableToMove)}
-                >
-                  Hamısı
-                </button>
-              </div>
+            <div className="hud-quick-ratios">
+              <button
+                className="btn-pill btn-xs"
+                disabled={availableToMove < 2}
+                onClick={() => {
+                  setMoveCount(Math.max(1, Math.floor(availableToMove / 2)));
+                  haptics.light();
+                }}
+              >
+                50% ({Math.max(1, Math.floor(availableToMove / 2))})
+              </button>
+              <button
+                className="btn-pill btn-xs"
+                disabled={availableToMove <= 0}
+                onClick={() => {
+                  setMoveCount(availableToMove);
+                  haptics.light();
+                }}
+              >
+                100% ({availableToMove})
+              </button>
             </div>
           </div>
 
           {/* Combat Preview Card */}
           {!isFriendlyTarget && combatPreview && (
             <div
-              className={`hud-combat-preview ${
-                combatPreview.willWin ? 'win' : 'lose'
-              }`}
+              className={'hud-combat-preview ' + (combatPreview.willWin ? 'win' : 'lose')}
             >
               <div className="hud-combat-status">
                 {combatPreview.willWin ? (
-                  <CrossedSwordsIcon size={15} />
+                  <CrossedSwordsIcon size={15} color="#4ade80" />
                 ) : (
-                  <WarningSealIcon size={15} />
+                  <WarningSealIcon size={15} color="#ef4444" />
                 )}
                 <span>
                   {combatPreview.willWin
-                    ? `Zəfər Proqnozu (${
-                        combatPreview.confidence === 'CERTAIN_VICTORY'
-                          ? 'Mütləq Zəfər'
-                          : 'Yüksək Şans'
-                      })`
+                    ? ('Zəfər Proqnozu (' + (combatPreview.confidence === 'CERTAIN_VICTORY' ? 'Mütləq Zəfər' : 'Yüksək Şans') + ')')
                     : 'Məğlubiyyət Təhlükəsi!'}
                 </span>
               </div>
@@ -430,14 +525,14 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
 
           {/* Action CTA Button */}
           <button
-            className={`btn btn-block ${
-              isFriendlyTarget ? 'btn-primary' : 'btn-danger'
-            }`}
+            className={'btn btn-block ' + (isFriendlyTarget ? 'btn-primary' : isAllyTarget ? 'btn-danger-treason' : 'btn-danger')}
             disabled={moveCount <= 0 || availableToMove <= 0}
             onClick={handleExecuteMove}
           >
             {isFriendlyTarget ? (
               <><ShieldIcon size={16} /> Köçürmə Əmri Ver ({moveCount} Əsgər)</>
+            ) : isAllyTarget ? (
+              <><WarningSealIcon size={16} /> Paktı Poz & Hücum Et ({moveCount} Əsgər)</>
             ) : (
               <><CrossedSwordsIcon size={16} /> Hücum Əmri Ver ({moveCount} Əsgər)</>
             )}
@@ -445,15 +540,107 @@ export const ActionHUD: React.FC<ActionHUDProps> = ({
         </div>
       )}
 
-      {/* Mode C: Unowned Fogged Region Inspected */}
+      {/* Mode C: Unowned Territory / Rival Kingdom Capital Inspection */}
+      {!isOwned && !isFogged && (
+        <div className="hud-body foreign-inspection-slab">
+          {foreignOwner ? (
+            <>
+              <div className="foreign-kingdom-banner" style={{ borderLeftColor: foreignOwner.color }}>
+                <div className="foreign-kingdom-top">
+                  <span
+                    className="diplomacy-heraldic-shield"
+                    style={{ backgroundColor: foreignOwner.color, borderColor: foreignOwner.color }}
+                  >
+                    <ShieldIcon size={14} color="#ffffff" />
+                  </span>
+                  <div>
+                    <strong className="foreign-kingdom-name">{foreignOwner.name}</strong>
+                    <div className="text-xs text-muted">
+                      {foreignMeta?.trait || 'Sovereign Realm'} · Paytaxt: {foreignMeta?.capitalName || 'Bilinmir'}
+                    </div>
+                  </div>
+                  {foreignRel?.status === 'PACT' && (
+                    <span className="badge-pact-active ml-auto">
+                      <PactScrollIcon size={11} color="#a7f3d0" /> Pakt ({foreignRel.pactTurnsRemaining}t)
+                    </span>
+                  )}
+                  {foreignRel?.status === 'COOLDOWN' && (
+                    <span className="badge-pact-cooldown ml-auto">
+                      <WarningSealIcon size={11} color="#fde68a" /> Soyuma ({foreignRel.cooldownTurnsRemaining}t)
+                    </span>
+                  )}
+                </div>
+
+                <div className="foreign-stats-row">
+                  <span><FortressIcon size={12} /> {foreignOwnedProvinces} Torpaq</span>
+                  <span><ShieldIcon size={12} /> {foreignTotalTroops} Qoşun</span>
+                  <span><SingleCoinIcon size={12} /> {foreignOwner.treasury}G</span>
+                </div>
+              </div>
+
+              {/* Direct Embassy Actions */}
+              <div className="foreign-embassy-actions">
+                {foreignRel?.status !== 'PACT' ? (
+                  <button
+                    className="btn btn-gold btn-sm flex-1"
+                    disabled={!foreignPactCheck?.allowed || effectiveTreasury < RULES.pactCost}
+                    onClick={() => {
+                      if (onProposePact && foreignOwner) onProposePact(foreignOwner.id);
+                    }}
+                    title={foreignPactCheck?.reason || 'Qeyri-Hücum Paktı bağla'}
+                  >
+                    <PactScrollIcon size={13} /> Pakt ({RULES.pactCost}G)
+                  </button>
+                ) : (
+                  <span className="badge-ribbon-gold flex-1 text-center">
+                    <PactScrollIcon size={13} /> Müttəfiq Xanədan
+                  </span>
+                )}
+
+                <button
+                  className="btn btn-secondary btn-sm flex-1"
+                  disabled={!foreignTributeCheck?.allowed || effectiveTreasury < RULES.tributeCost}
+                  onClick={() => {
+                    if (onSendTribute && foreignOwner) onSendTribute(foreignOwner.id);
+                  }}
+                  title={foreignTributeCheck?.reason || 'Xəzinəsinə qızıl göndər'}
+                >
+                  <TributeIcon size={13} /> Xərac ({RULES.tributeCost}G)
+                </button>
+
+                {onOpenDiplomacy && (
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => onOpenDiplomacy(foreignOwner.id)}
+                    title="Səfirlər Palatasını Aç"
+                  >
+                    <UsersIcon size={13} />
+                  </button>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="neutral-barony-card">
+              <div className="neutral-barony-header">
+                <ShieldIcon size={16} color="#94a3b8" />
+                <strong>Azad Neytral Baroniya</strong>
+              </div>
+              <p className="text-xs text-muted" style={{ margin: '4px 0 8px 0', lineHeight: 1.35 }}>
+                Tərəfsiz yerli qarnizon (+{currentRegion.income}G gəlir). Qonşu ərazinizdən hücum edərək imperiyanıza qata bilərsiniz.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Mode D: Unowned Fogged Region Inspected */}
       {!isOwned && isFogged && (
         <div className="hud-body">
           <div className="hud-fatigue-notice">
-            <CompassIcon size={16} /> Bu ərazi kəşf edilməmiş duman altındadır. Kəşfiyyat aparmaq üçün yaxın sərhədə qoşun cəmləyin.
+            <CompassIcon size={16} color="#94a3b8" /> Bu ərazi kəşf edilməmiş duman altındadır. Kəşfiyyat aparmaq üçün yaxın sərhədə qoşun cəmləyin və ya Müşahidə Qülləsi ucaldın.
           </div>
         </div>
       )}
     </div>
   );
 };
-
