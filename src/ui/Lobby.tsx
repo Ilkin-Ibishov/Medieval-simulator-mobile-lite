@@ -120,13 +120,13 @@ export const Lobby: React.FC<LobbyProps> = ({
                 <h2 className="card-title text-gold">
                   Böyük Dozia Kampaniyası
                 </h2>
-                <span className="tome-subtitle">Nativ Qitə Atlası · 10 Xanədan</span>
+                <span className="tome-subtitle">Nativ Qitə Atlası · 9 Xanədan</span>
               </div>
             </div>
             <span className="badge-ribbon-gold">Atlas</span>
           </div>
           <p className="card-description">
-            117 sıfır-drift əyalət və 10 tarixi krallıqla böyük qitə fəthi. Xəritəni canlı kəşf edərək hökmranlıq edəcəyin krallığı seç!
+            114 sıfır-drift əyalət və 9 tarixi krallıqla böyük qitə fəthi. Xəritəni canlı kəşf edərək hökmranlıq edəcəyin krallığı seç!
           </p>
 
           <button

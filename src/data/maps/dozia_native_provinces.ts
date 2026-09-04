@@ -30,113 +30,103 @@ export interface KingdomMetadata {
 }
 
 export const DOZIA_MAP_METADATA = {
-  name: "Dozia (117 Connected Native Provinces)",
+  name: "Dozia (114 Connected Native Provinces)",
   width: 1536,
   height: 730,
-  provincesCount: 117,
+  provincesCount: 114,
 };
 
 export const DOZIA_KINGDOMS_METADATA: Record<number, KingdomMetadata> = {
-  1: {
-    stateId: 1,
-    name: 'Tamcauyenia',
-    color: '#66c2a5',
-    capitalName: 'Lai Hop',
-    tagline: 'Şərq Dağlıqları & Sərhəd Qalası',
-    description: 'Şərq dağ silsilələrində möhkəmlənmiş, dənizə çıxışı olan müdafiə krallığı.',
-    difficulty: 'ORTA',
-    trait: 'Dağ Sərhədləri',
+  "1": {
+    "stateId": 1,
+    "name": "Tamcauyenia",
+    "color": "#66c2a5",
+    "capitalName": "Lai Hop",
+    "tagline": "Şərq Dağlıqları & Sərhəd Qalası",
+    "description": "Şərq dağ silsilələrində möhkəmlənmiş, dənizə çıxışı olan müdafiə krallığı.",
+    "difficulty": "ORTA",
+    "trait": "Dağ Sərhədləri"
   },
-  2: {
-    stateId: 2,
-    name: 'Gaudinia',
-    color: '#8da0cb',
-    capitalName: 'Nardhaga',
-    tagline: 'Cənub Yarımadası & Qala Şəbəkəsi',
-    description: 'Dozianın cənub burnunu tutan, dar boğazlarla qorunan güclü knyazlıq.',
-    difficulty: 'ASAN',
-    trait: 'Təbii Boğazlar',
+  "2": {
+    "stateId": 2,
+    "name": "Gaudinia",
+    "color": "#8da0cb",
+    "capitalName": "Nardhaga",
+    "tagline": "Cənub Yarımadası & Qala Şəbəkəsi",
+    "description": "Dozianın cənub burnunu tutan, dar boğazlarla qorunan güclü knyazlıq.",
+    "difficulty": "ASAN",
+    "trait": "Təbii Boğazlar"
   },
-  3: {
-    stateId: 3,
-    name: 'Kitawana',
-    color: '#a6d854',
-    capitalName: 'Kitawana',
-    tagline: 'Şimal-Şərq Meşələri',
-    description: 'Zəngin meşəliklərlə əhatə olunmuş, qonşularına qarşı sürətli basqınlar təşkil edən krallıq.',
-    difficulty: 'ÇƏTİN',
-    trait: 'Meşə Pusquları',
+  "3": {
+    "stateId": 3,
+    "name": "Kitawana",
+    "color": "#a6d854",
+    "capitalName": "Kitawana",
+    "tagline": "Şimal-Şərq Meşələri",
+    "description": "Zəngin meşəliklərlə əhatə olunmuş, qonşularına qarşı sürətli basqınlar təşkil edən krallıq.",
+    "difficulty": "ÇƏTİN",
+    "trait": "Meşə Pusquları"
   },
-  4: {
-    stateId: 4,
-    name: 'Yanan Guo',
-    color: '#e5c494',
-    capitalName: 'Fuatong',
-    tagline: 'Şərq Düzənlikləri & Döyüş Meydanı',
-    description: 'Dozianın mərkəz-şərq düzənliklərində 4 tərəfdən sərhədi olan qızğın müharibə meydanı.',
-    difficulty: 'ÇƏTİN',
-    trait: 'Qaynar Qazan',
+  "4": {
+    "stateId": 4,
+    "name": "Yanan Guo",
+    "color": "#e5c494",
+    "capitalName": "Fuatong",
+    "tagline": "Şərq Düzənlikləri & Döyüş Meydanı",
+    "description": "Dozianın mərkəz-şərq düzənliklərində 4 tərəfdən sərhədi olan qızğın müharibə meydanı.",
+    "difficulty": "ÇƏTİN",
+    "trait": "Qaynar Qazan"
   },
-  5: {
-    stateId: 5,
-    name: 'Phoia',
-    color: '#fc8d62',
-    capitalName: 'Anvar',
-    tagline: 'Cənub-Şərq Sahil Hersoqluğu',
-    description: 'Cənub-şərq buxtasında yerləşən, zəngin ticarət yollarına nəzarət edən cəsur hersoqluq.',
-    difficulty: 'ORTA',
-    trait: 'Sahil Ticarəti',
+  "5": {
+    "stateId": 5,
+    "name": "Phoia",
+    "color": "#fc8d62",
+    "capitalName": "Anvar",
+    "tagline": "Cənub-Şərq Sahil Hersoqluğu",
+    "description": "Cənub-şərq buxtasında yerləşən, zəngin ticarət yollarına nəzarət edən cəsur hersoqluq.",
+    "difficulty": "ORTA",
+    "trait": "Sahil Ticarəti"
   },
-  6: {
-    stateId: 6,
-    name: 'Toki',
-    color: '#ffd92f',
-    capitalName: 'Toki',
-    tagline: 'Şimal Yarımadası & Sıldırım Qayalıqlar',
-    description: 'Şimalın ucqar yarımadasında yerləşən kompakt və tək cəbhəli dövlət.',
-    difficulty: 'ORTA',
-    trait: 'Tək Cəbhəli Sərhəd',
+  "6": {
+    "stateId": 6,
+    "name": "Toki",
+    "color": "#ffd92f",
+    "capitalName": "Toki",
+    "tagline": "Şimal Yarımadası & Sıldırım Qayalıqlar",
+    "description": "Şimalın ucqar yarımadasında yerləşən kompakt və tək cəbhəli dövlət.",
+    "difficulty": "ORTA",
+    "trait": "Tək Cəbhəli Sərhəd"
   },
-  7: {
-    stateId: 7,
-    name: 'Samtsuenia',
-    color: '#1f78b4',
-    capitalName: 'Samtsaung',
-    tagline: 'Şimal-Qərb Limanları',
-    description: 'Şimal-qərb sahillərində yerləşən, dəniz və quru keçidlərinə hakim liman dövləti.',
-    difficulty: 'ORTA',
-    trait: 'Liman Qüvvəsi',
+  "8": {
+    "stateId": 8,
+    "name": "Mamatihalia",
+    "color": "#33a02c",
+    "capitalName": "Huangtian",
+    "tagline": "Böyük Qitə İmperiyası & Mərkəzi Hakimiyyət",
+    "description": "Dozianın ən böyük ərazisinə malik hegemon imperiyası. Nəhəng gəlir və geniş sərhədlər.",
+    "difficulty": "ASAN",
+    "trait": "Nəhəng İqtisadiyyat"
   },
-  8: {
-    stateId: 8,
-    name: 'Mamatihalia',
-    color: '#33a02c',
-    capitalName: 'Huangtian',
-    tagline: 'Böyük Qitə İmperiyası & Mərkəzi Hakimiyyət',
-    description: 'Dozianın ən böyük ərazisinə malik hegemon imperiyası. Nəhəng gəlir və geniş sərhədlər.',
-    difficulty: 'ASAN',
-    trait: 'Nəhəng İqtisadiyyat',
+  "9": {
+    "stateId": 9,
+    "name": "Kyokoge",
+    "color": "#e78ac3",
+    "capitalName": "Kyokoge",
+    "tagline": "Şərq Dəniz Adası & Təcrid Olunmuş Qala",
+    "description": "Dəniz yolları ilə qorunan böyük ada imperiyası. İşğalçılar üçün aşılmaz təbii baryer.",
+    "difficulty": "ASAN",
+    "trait": "Ada Qorunması"
   },
-  9: {
-    stateId: 9,
-    name: 'Kyokoge',
-    color: '#e78ac3',
-    capitalName: 'Kyokoge',
-    tagline: 'Şərq Dəniz Adası & Təcrid Olunmuş Qala',
-    description: 'Dəniz yolları ilə qorunan böyük ada imperiyası. İşğalçılar üçün aşılmaz təbii baryer.',
-    difficulty: 'ASAN',
-    trait: 'Ada Qorunması',
-  },
-  10: {
-    stateId: 10,
-    name: 'Qin Guo',
-    color: '#b3b3b3',
-    capitalName: 'Turkbeli',
-    tagline: 'Şimal Qüdrəti & Dəmir Qvardiya',
-    description: 'Şimalın ən güclü hərbi maşını. Güclü qarnizonları və strateji keçidləri ilə fateh xalq.',
-    difficulty: 'ASAN',
-    trait: 'Dəmir İntizam',
-  },
+  "10": {
+    "stateId": 10,
+    "name": "Qin Guo",
+    "color": "#b3b3b3",
+    "capitalName": "Turkbeli",
+    "tagline": "Şimal Qüdrəti & Dəmir Qvardiya",
+    "description": "Şimalın ən güclü hərbi maşını. Güclü qarnizonları və strateji keçidləri ilə fateh xalq.",
+    "difficulty": "ASAN",
+    "trait": "Dəmir İntizam"
+  }
 };
 
 export const DOZIA_PROVINCES: NativeProvince[] = [
@@ -157,8 +147,8 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "neighbors": [
       1,
       2,
-      39,
-      41
+      37,
+      39
     ],
     "cellCount": 41,
     "income": 6
@@ -180,10 +170,10 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "neighbors": [
       0,
       15,
+      37,
       39,
-      41,
-      42,
-      63
+      40,
+      61
     ],
     "cellCount": 57,
     "income": 6
@@ -204,7 +194,7 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cy": 451,
     "neighbors": [
       0,
-      40
+      38
     ],
     "cellCount": 41,
     "income": 6
@@ -224,7 +214,7 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1142,
     "cy": 654,
     "neighbors": [
-      47
+      45
     ],
     "cellCount": 45,
     "income": 6
@@ -244,8 +234,8 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1085,
     "cy": 669,
     "neighbors": [
-      47,
-      48
+      45,
+      46
     ],
     "cellCount": 22,
     "income": 10
@@ -286,7 +276,7 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cy": 591,
     "neighbors": [
       7,
-      47
+      45
     ],
     "cellCount": 32,
     "income": 6
@@ -308,7 +298,7 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "neighbors": [
       5,
       6,
-      47
+      45
     ],
     "cellCount": 37,
     "income": 6
@@ -329,8 +319,8 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cy": 227,
     "neighbors": [
       10,
-      51,
-      52
+      49,
+      50
     ],
     "cellCount": 39,
     "income": 6
@@ -351,9 +341,9 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cy": 173,
     "neighbors": [
       11,
+      48,
       50,
-      52,
-      66
+      64
     ],
     "cellCount": 45,
     "income": 6
@@ -375,8 +365,8 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "neighbors": [
       8,
       11,
-      52,
-      55
+      50,
+      53
     ],
     "cellCount": 33,
     "income": 6
@@ -398,9 +388,9 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "neighbors": [
       9,
       10,
+      48,
       50,
-      52,
-      54
+      52
     ],
     "cellCount": 30,
     "income": 6
@@ -421,10 +411,10 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cy": 156,
     "neighbors": [
       13,
-      56,
-      57,
-      106,
-      110
+      54,
+      55,
+      103,
+      107
     ],
     "cellCount": 293,
     "income": 6
@@ -445,7 +435,7 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cy": 163,
     "neighbors": [
       12,
-      56
+      54
     ],
     "cellCount": 39,
     "income": 6
@@ -466,8 +456,8 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cy": 571,
     "neighbors": [
       15,
-      63,
-      64
+      61,
+      62
     ],
     "cellCount": 23,
     "income": 6
@@ -489,8 +479,8 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "neighbors": [
       1,
       14,
-      41,
-      63
+      39,
+      61
     ],
     "cellCount": 14,
     "income": 6
@@ -510,8 +500,8 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1164,
     "cy": 96,
     "neighbors": [
-      65,
-      66
+      63,
+      64
     ],
     "cellCount": 46,
     "income": 6
@@ -531,55 +521,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1104,
     "cy": 156,
     "neighbors": [
-      56,
-      66
+      54,
+      64
     ],
     "cellCount": 42,
     "income": 6
   },
   {
     "id": 18,
-    "originalId": 20,
-    "name": "Long",
-    "fullName": "Long County",
-    "stateId": 7,
-    "stateName": "Samtsuenia",
-    "stateColor": "#70bfbe",
-    "burgName": "Ngan",
-    "isCapital": true,
-    "terrain": "hills",
-    "svgPath": "M 421.8,183.4 L 422,179.9 L 423.1,178.5 L 428.7,178.8 L 429.2,179.1 L 429.6,179.1 L 429.7,179.2 L 431.8,185.3 L 430.1,187.5 L 425,187.4 L 424.5,188.5 L 420.5,189.7 L 418.7,188.6 L 419,183.9 L 421.8,183.4 Z",
-    "cx": 425,
-    "cy": 184,
-    "neighbors": [
-      19
-    ],
-    "cellCount": 3,
-    "income": 10
-  },
-  {
-    "id": 19,
-    "originalId": 21,
-    "name": "Wanchauming",
-    "fullName": "Wanchauming County",
-    "stateId": 7,
-    "stateName": "Samtsuenia",
-    "stateColor": "#70bfbe",
-    "burgName": "Wanchauming",
-    "isCapital": false,
-    "terrain": "hills",
-    "svgPath": "M 395.5,161.2 L 397.6,157 L 401.7,155.6 L 401.9,155.7 L 405.5,154.6 L 409,155.7 L 410,156.8 L 412.6,157.6 L 413.9,158.9 L 415.5,159.4 L 416.3,160.5 L 419.8,162.7 L 420.4,164.5 L 418.2,167.3 L 419.1,170.8 L 417.8,172.6 L 418.9,175.7 L 417.4,177.9 L 418,179.2 L 422,179.9 L 421.8,183.4 L 419,183.9 L 418.7,188.6 L 420.5,189.7 L 420.3,191.9 L 416.3,193.5 L 413.7,191.3 L 413,191.5 L 408.6,190.7 L 407.8,189.9 L 404.5,191.2 L 403.3,196.8 L 402,197.8 L 398.8,191.2 L 398.9,190.7 L 397.5,186.7 L 397.7,185.6 L 397.2,184.5 L 394.8,182.9 L 393.9,180.7 L 391.2,179.5 L 390.8,174 L 390.9,173.8 L 389.9,171.7 L 390.2,167.3 L 392.7,166.6 L 394.2,161.4 L 395.5,161.2 Z",
-    "cx": 406,
-    "cy": 174,
-    "neighbors": [
-      18,
-      68
-    ],
-    "cellCount": 26,
-    "income": 10
-  },
-  {
-    "id": 20,
     "originalId": 22,
     "name": "Mudirur",
     "fullName": "Mudirur County",
@@ -593,16 +542,16 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 706,
     "cy": 579,
     "neighbors": [
-      23,
-      28,
-      88,
-      95
+      21,
+      26,
+      85,
+      92
     ],
     "cellCount": 53,
     "income": 6
   },
   {
-    "id": 21,
+    "id": 19,
     "originalId": 23,
     "name": "Yalpokova",
     "fullName": "Yalpokova County",
@@ -616,16 +565,16 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 503,
     "cy": 300,
     "neighbors": [
+      70,
+      72,
       73,
-      75,
-      76,
-      107
+      104
     ],
     "cellCount": 65,
     "income": 6
   },
   {
-    "id": 22,
+    "id": 20,
     "originalId": 24,
     "name": "Jianan Guo",
     "fullName": "Jianan Guo Earldom",
@@ -639,13 +588,13 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 845,
     "cy": 390,
     "neighbors": [
-      79
+      76
     ],
     "cellCount": 7,
     "income": 6
   },
   {
-    "id": 23,
+    "id": 21,
     "originalId": 25,
     "name": "Gaura",
     "fullName": "Gaura Seneschalty",
@@ -659,17 +608,17 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 757,
     "cy": 558,
     "neighbors": [
-      20,
-      25,
-      84,
-      88,
-      93
+      18,
+      23,
+      81,
+      85,
+      90
     ],
     "cellCount": 27,
     "income": 6
   },
   {
-    "id": 24,
+    "id": 22,
     "originalId": 26,
     "name": "Majasana",
     "fullName": "Majasana County",
@@ -683,14 +632,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 940,
     "cy": 480,
     "neighbors": [
-      80,
-      87
+      77,
+      84
     ],
     "cellCount": 41,
     "income": 6
   },
   {
-    "id": 25,
+    "id": 23,
     "originalId": 27,
     "name": "Mundgal",
     "fullName": "Mundgal County",
@@ -704,16 +653,16 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 815,
     "cy": 545,
     "neighbors": [
-      23,
+      21,
+      81,
       84,
-      87,
-      93
+      90
     ],
     "cellCount": 56,
     "income": 6
   },
   {
-    "id": 26,
+    "id": 24,
     "originalId": 28,
     "name": "Gamhoiung",
     "fullName": "Gamhoiung County",
@@ -727,16 +676,16 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 333,
     "cy": 268,
     "neighbors": [
-      30,
+      28,
+      66,
       69,
-      72,
-      74
+      71
     ],
     "cellCount": 42,
     "income": 6
   },
   {
-    "id": 27,
+    "id": 25,
     "originalId": 29,
     "name": "Tsingtia",
     "fullName": "Tsingtia County",
@@ -750,17 +699,17 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 274,
     "cy": 221,
     "neighbors": [
-      30,
-      69,
-      70,
-      71,
-      74
+      28,
+      66,
+      67,
+      68,
+      71
     ],
     "cellCount": 58,
     "income": 6
   },
   {
-    "id": 28,
+    "id": 26,
     "originalId": 30,
     "name": "Bailgaumia",
     "fullName": "Bailgaumia Seneschalty",
@@ -774,14 +723,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 731,
     "cy": 594,
     "neighbors": [
-      20,
-      100
+      18,
+      97
     ],
     "cellCount": 7,
     "income": 14
   },
   {
-    "id": 29,
+    "id": 27,
     "originalId": 31,
     "name": "Mauma",
     "fullName": "Mauma Landgrave",
@@ -795,15 +744,15 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 375,
     "cy": 365,
     "neighbors": [
-      72,
-      76,
-      78
+      69,
+      73,
+      75
     ],
     "cellCount": 21,
     "income": 6
   },
   {
-    "id": 30,
+    "id": 28,
     "originalId": 32,
     "name": "Samshia",
     "fullName": "Samshia County",
@@ -817,16 +766,16 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 322,
     "cy": 228,
     "neighbors": [
-      26,
-      27,
-      69,
-      74
+      24,
+      25,
+      66,
+      71
     ],
     "cellCount": 39,
     "income": 6
   },
   {
-    "id": 31,
+    "id": 29,
     "originalId": 33,
     "name": "Naga",
     "fullName": "Naga Earldom",
@@ -840,16 +789,16 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1390,
     "cy": 313,
     "neighbors": [
-      32,
-      33,
-      102,
-      104
+      30,
+      31,
+      99,
+      101
     ],
     "cellCount": 45,
     "income": 6
   },
   {
-    "id": 32,
+    "id": 30,
     "originalId": 34,
     "name": "Mitami",
     "fullName": "Mitami Earldom",
@@ -863,17 +812,17 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1349,
     "cy": 284,
     "neighbors": [
+      29,
       31,
-      33,
-      51,
-      101,
-      103
+      49,
+      98,
+      100
     ],
     "cellCount": 43,
     "income": 6
   },
   {
-    "id": 33,
+    "id": 31,
     "originalId": 35,
     "name": "Nawazaga",
     "fullName": "Nawazaga Earldom",
@@ -887,17 +836,17 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1345,
     "cy": 352,
     "neighbors": [
-      31,
-      32,
-      103,
-      104,
-      105
+      29,
+      30,
+      100,
+      101,
+      102
     ],
     "cellCount": 76,
     "income": 6
   },
   {
-    "id": 34,
+    "id": 32,
     "originalId": 36,
     "name": "Hengzho Guo",
     "fullName": "Hengzho Guo County",
@@ -911,14 +860,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 760,
     "cy": 204,
     "neighbors": [
-      106,
-      109
+      103,
+      106
     ],
     "cellCount": 48,
     "income": 6
   },
   {
-    "id": 35,
+    "id": 33,
     "originalId": 37,
     "name": "Yarer",
     "fullName": "Yarer County",
@@ -932,16 +881,16 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 530,
     "cy": 218,
     "neighbors": [
-      36,
-      107,
-      108,
-      115
+      34,
+      104,
+      105,
+      112
     ],
     "cellCount": 58,
     "income": 6
   },
   {
-    "id": 36,
+    "id": 34,
     "originalId": 38,
     "name": "Aduzunka",
     "fullName": "Aduzunka Earldom",
@@ -955,15 +904,15 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 521,
     "cy": 181,
     "neighbors": [
-      35,
-      107,
-      108
+      33,
+      104,
+      105
     ],
     "cellCount": 40,
     "income": 6
   },
   {
-    "id": 37,
+    "id": 35,
     "originalId": 39,
     "name": "Delyurt",
     "fullName": "Delyurt County",
@@ -977,14 +926,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 628,
     "cy": 226,
     "neighbors": [
-      107,
-      109
+      104,
+      106
     ],
     "cellCount": 66,
     "income": 6
   },
   {
-    "id": 38,
+    "id": 36,
     "originalId": 40,
     "name": "Chenz Guo",
     "fullName": "Chenz Guo Territory",
@@ -998,16 +947,16 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1197,
     "cy": 414,
     "neighbors": [
-      39,
-      43,
-      53,
-      61
+      37,
+      41,
+      51,
+      59
     ],
     "cellCount": 106,
     "income": 6
   },
   {
-    "id": 39,
+    "id": 37,
     "originalId": 41,
     "name": "Binh",
     "fullName": "Binh Land",
@@ -1023,14 +972,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "neighbors": [
       0,
       1,
-      38,
-      42
+      36,
+      40
     ],
     "cellCount": 60,
     "income": 6
   },
   {
-    "id": 40,
+    "id": 38,
     "originalId": 42,
     "name": "Buon",
     "fullName": "Buon Land",
@@ -1050,7 +999,7 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "income": 10
   },
   {
-    "id": 41,
+    "id": 39,
     "originalId": 43,
     "name": "Phuia",
     "fullName": "Phuia Territory",
@@ -1072,7 +1021,7 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "income": 6
   },
   {
-    "id": 42,
+    "id": 40,
     "originalId": 44,
     "name": "Sotia",
     "fullName": "Sotia Territory",
@@ -1087,14 +1036,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cy": 545,
     "neighbors": [
       1,
-      39,
-      63
+      37,
+      61
     ],
     "cellCount": 6,
     "income": 6
   },
   {
-    "id": 43,
+    "id": 41,
     "originalId": 45,
     "name": "Linangan Guo",
     "fullName": "Linangan Guo Land",
@@ -1108,19 +1057,19 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1124,
     "cy": 465,
     "neighbors": [
-      38,
-      44,
-      45,
-      80,
-      96,
-      97,
-      98
+      36,
+      42,
+      43,
+      77,
+      93,
+      94,
+      95
     ],
     "cellCount": 307,
     "income": 6
   },
   {
-    "id": 44,
+    "id": 42,
     "originalId": 46,
     "name": "Sindlupi",
     "fullName": "Sindlupi Land",
@@ -1134,20 +1083,20 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1074,
     "cy": 573,
     "neighbors": [
+      41,
       43,
+      44,
       45,
       46,
-      47,
-      48,
-      87,
-      92,
-      98
+      84,
+      89,
+      95
     ],
     "cellCount": 276,
     "income": 6
   },
   {
-    "id": 45,
+    "id": 43,
     "originalId": 47,
     "name": "Hotekeria",
     "fullName": "Hotekeria Territory",
@@ -1161,14 +1110,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1154,
     "cy": 538,
     "neighbors": [
-      43,
-      44
+      41,
+      42
     ],
     "cellCount": 3,
     "income": 6
   },
   {
-    "id": 46,
+    "id": 44,
     "originalId": 48,
     "name": "Mudelima",
     "fullName": "Mudelima Territory",
@@ -1182,15 +1131,15 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 970,
     "cy": 628,
     "neighbors": [
-      44,
-      48,
-      49
+      42,
+      46,
+      47
     ],
     "cellCount": 196,
     "income": 6
   },
   {
-    "id": 47,
+    "id": 45,
     "originalId": 49,
     "name": "Chikhannari",
     "fullName": "Chikhannari Land",
@@ -1208,14 +1157,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
       4,
       6,
       7,
-      44,
-      48
+      42,
+      46
     ],
     "cellCount": 55,
     "income": 6
   },
   {
-    "id": 48,
+    "id": 46,
     "originalId": 50,
     "name": "Dorablia",
     "fullName": "Dorablia Tribe",
@@ -1230,15 +1179,15 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cy": 667,
     "neighbors": [
       4,
+      42,
       44,
-      46,
-      47
+      45
     ],
     "cellCount": 20,
     "income": 10
   },
   {
-    "id": 49,
+    "id": 47,
     "originalId": 51,
     "name": "Somhajadi",
     "fullName": "Somhajadi Area",
@@ -1252,13 +1201,13 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 900,
     "cy": 649,
     "neighbors": [
-      46
+      44
     ],
     "cellCount": 2,
     "income": 14
   },
   {
-    "id": 50,
+    "id": 48,
     "originalId": 52,
     "name": "Nishi",
     "fullName": "Nishi Clan",
@@ -1274,16 +1223,16 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "neighbors": [
       9,
       11,
-      54,
-      65,
-      66,
-      67
+      52,
+      63,
+      64,
+      65
     ],
     "cellCount": 12,
     "income": 6
   },
   {
-    "id": 51,
+    "id": 49,
     "originalId": 53,
     "name": "Nishiwa",
     "fullName": "Nishiwa Land",
@@ -1298,17 +1247,17 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cy": 229,
     "neighbors": [
       8,
-      32,
-      52,
-      53,
-      101,
-      103
+      30,
+      50,
+      51,
+      98,
+      100
     ],
     "cellCount": 154,
     "income": 6
   },
   {
-    "id": 52,
+    "id": 50,
     "originalId": 54,
     "name": "Kabo",
     "fullName": "Kabo Territory",
@@ -1326,18 +1275,18 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
       9,
       10,
       11,
+      49,
       51,
-      53,
+      54,
       56,
       58,
-      60,
-      66
+      64
     ],
     "cellCount": 248,
     "income": 6
   },
   {
-    "id": 53,
+    "id": 51,
     "originalId": 55,
     "name": "Aikamado",
     "fullName": "Aikamado Region",
@@ -1351,17 +1300,17 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1235,
     "cy": 350,
     "neighbors": [
-      38,
-      51,
-      52,
-      60,
-      61
+      36,
+      49,
+      50,
+      58,
+      59
     ],
     "cellCount": 140,
     "income": 6
   },
   {
-    "id": 54,
+    "id": 52,
     "originalId": 56,
     "name": "Taika",
     "fullName": "Taika Island",
@@ -1376,14 +1325,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cy": 152,
     "neighbors": [
       11,
-      50,
-      55
+      48,
+      53
     ],
     "cellCount": 1,
     "income": 14
   },
   {
-    "id": 55,
+    "id": 53,
     "originalId": 57,
     "name": "Kikara",
     "fullName": "Kikara Island",
@@ -1398,13 +1347,13 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cy": 164,
     "neighbors": [
       10,
-      54
+      52
     ],
     "cellCount": 3,
     "income": 14
   },
   {
-    "id": 56,
+    "id": 54,
     "originalId": 60,
     "name": "Baoxin Guo",
     "fullName": "Baoxin Guo Territory",
@@ -1421,16 +1370,16 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
       12,
       13,
       17,
-      52,
-      57,
-      58,
-      66
+      50,
+      55,
+      56,
+      64
     ],
     "cellCount": 249,
     "income": 6
   },
   {
-    "id": 57,
+    "id": 55,
     "originalId": 61,
     "name": "Hanzhou",
     "fullName": "Hanzhou Territory",
@@ -1445,16 +1394,16 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cy": 305,
     "neighbors": [
       12,
+      54,
       56,
-      58,
-      59,
-      110
+      57,
+      107
     ],
     "cellCount": 136,
     "income": 6
   },
   {
-    "id": 58,
+    "id": 56,
     "originalId": 62,
     "name": "Fuatong",
     "fullName": "Fuatong Region",
@@ -1468,20 +1417,20 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1096,
     "cy": 320,
     "neighbors": [
-      52,
-      56,
+      50,
+      54,
+      55,
       57,
+      58,
       59,
       60,
-      61,
-      62,
-      80
+      77
     ],
     "cellCount": 272,
     "income": 6
   },
   {
-    "id": 59,
+    "id": 57,
     "originalId": 63,
     "name": "Jianchang",
     "fullName": "Jianchang Territory",
@@ -1495,17 +1444,17 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 991,
     "cy": 378,
     "neighbors": [
-      57,
-      58,
-      80,
-      110,
-      116
+      55,
+      56,
+      77,
+      107,
+      113
     ],
     "cellCount": 28,
     "income": 6
   },
   {
-    "id": 60,
+    "id": 58,
     "originalId": 64,
     "name": "Hacuria",
     "fullName": "Hacuria Territory",
@@ -1519,15 +1468,15 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1188,
     "cy": 318,
     "neighbors": [
-      52,
-      53,
-      58
+      50,
+      51,
+      56
     ],
     "cellCount": 3,
     "income": 6
   },
   {
-    "id": 61,
+    "id": 59,
     "originalId": 65,
     "name": "Ormscast",
     "fullName": "Ormscast Territory",
@@ -1541,15 +1490,15 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1161,
     "cy": 358,
     "neighbors": [
-      38,
-      53,
-      58
+      36,
+      51,
+      56
     ],
     "cellCount": 13,
     "income": 6
   },
   {
-    "id": 62,
+    "id": 60,
     "originalId": 66,
     "name": "Dudin Guo",
     "fullName": "Dudin Guo Region",
@@ -1563,15 +1512,15 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1062,
     "cy": 391,
     "neighbors": [
-      58,
-      80,
-      96
+      56,
+      77,
+      93
     ],
     "cellCount": 1,
     "income": 6
   },
   {
-    "id": 63,
+    "id": 61,
     "originalId": 67,
     "name": "Adyaria",
     "fullName": "Adyaria Dependency",
@@ -1588,13 +1537,13 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
       1,
       14,
       15,
-      42
+      40
     ],
     "cellCount": 47,
     "income": 6
   },
   {
-    "id": 64,
+    "id": 62,
     "originalId": 68,
     "name": "Longia",
     "fullName": "Longia Territory",
@@ -1614,7 +1563,7 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "income": 14
   },
   {
-    "id": 65,
+    "id": 63,
     "originalId": 69,
     "name": "Rotamba",
     "fullName": "Rotamba Region",
@@ -1629,15 +1578,15 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cy": 71,
     "neighbors": [
       16,
-      50,
-      66,
-      67
+      48,
+      64,
+      65
     ],
     "cellCount": 72,
     "income": 6
   },
   {
-    "id": 66,
+    "id": 64,
     "originalId": 70,
     "name": "Teshi",
     "fullName": "Teshi Territory",
@@ -1654,16 +1603,16 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
       9,
       16,
       17,
+      48,
       50,
-      52,
-      56,
-      65
+      54,
+      63
     ],
     "cellCount": 73,
     "income": 6
   },
   {
-    "id": 67,
+    "id": 65,
     "originalId": 72,
     "name": "Kajiraka",
     "fullName": "Kajiraka Clan",
@@ -1677,34 +1626,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1209,
     "cy": 127,
     "neighbors": [
-      50,
-      65
+      48,
+      63
     ],
     "cellCount": 2,
     "income": 6
   },
   {
-    "id": 68,
-    "originalId": 73,
-    "name": "Choikingia",
-    "fullName": "Choikingia Region",
-    "stateId": 7,
-    "stateName": "Samtsuenia",
-    "stateColor": "#70bfbe",
-    "burgName": "Choikingia",
-    "isCapital": false,
-    "terrain": "plains",
-    "svgPath": "M 401.9,198 L 400.2,198.7 L 396.4,196.1 L 397.6,192 L 398.8,191.2 L 402,197.8 L 401.9,198 Z",
-    "cx": 399,
-    "cy": 195,
-    "neighbors": [
-      19
-    ],
-    "cellCount": 1,
-    "income": 14
-  },
-  {
-    "id": 69,
+    "id": 66,
     "originalId": 74,
     "name": "Taiwan",
     "fullName": "Taiwan Dependency",
@@ -1718,16 +1647,16 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 340,
     "cy": 197,
     "neighbors": [
-      26,
-      27,
-      30,
-      70
+      24,
+      25,
+      28,
+      67
     ],
     "cellCount": 46,
     "income": 6
   },
   {
-    "id": 70,
+    "id": 67,
     "originalId": 75,
     "name": "Shanmun",
     "fullName": "Shanmun Land",
@@ -1741,14 +1670,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 262,
     "cy": 180,
     "neighbors": [
-      27,
-      69
+      25,
+      66
     ],
     "cellCount": 17,
     "income": 10
   },
   {
-    "id": 71,
+    "id": 68,
     "originalId": 76,
     "name": "Samtsaung",
     "fullName": "Samtsaung Land",
@@ -1762,14 +1691,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 240,
     "cy": 286,
     "neighbors": [
-      27,
-      77
+      25,
+      74
     ],
     "cellCount": 146,
     "income": 6
   },
   {
-    "id": 72,
+    "id": 69,
     "originalId": 77,
     "name": "Shamshia",
     "fullName": "Shamshia Territory",
@@ -1783,17 +1712,17 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 386,
     "cy": 297,
     "neighbors": [
-      26,
-      29,
-      74,
-      76,
-      78
+      24,
+      27,
+      71,
+      73,
+      75
     ],
     "cellCount": 166,
     "income": 6
   },
   {
-    "id": 73,
+    "id": 70,
     "originalId": 78,
     "name": "Kanozobasi",
     "fullName": "Kanozobasi Clan",
@@ -1807,14 +1736,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 528,
     "cy": 275,
     "neighbors": [
-      21,
-      107
+      19,
+      104
     ],
     "cellCount": 1,
     "income": 6
   },
   {
-    "id": 74,
+    "id": 71,
     "originalId": 79,
     "name": "Lokchia",
     "fullName": "Lokchia Region",
@@ -1828,16 +1757,16 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 297,
     "cy": 273,
     "neighbors": [
-      26,
-      27,
-      30,
-      72
+      24,
+      25,
+      28,
+      69
     ],
     "cellCount": 14,
     "income": 6
   },
   {
-    "id": 75,
+    "id": 72,
     "originalId": 80,
     "name": "Hongcheonguk",
     "fullName": "Hongcheonguk Territory",
@@ -1851,18 +1780,18 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 565,
     "cy": 364,
     "neighbors": [
-      21,
-      76,
-      81,
-      83,
-      107,
-      112
+      19,
+      73,
+      78,
+      80,
+      104,
+      109
     ],
     "cellCount": 293,
     "income": 6
   },
   {
-    "id": 76,
+    "id": 73,
     "originalId": 81,
     "name": "Erentelen",
     "fullName": "Erentelen Territory",
@@ -1876,19 +1805,19 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 436,
     "cy": 386,
     "neighbors": [
-      21,
-      29,
+      19,
+      27,
+      69,
       72,
       75,
-      78,
-      82,
-      83
+      79,
+      80
     ],
     "cellCount": 252,
     "income": 6
   },
   {
-    "id": 77,
+    "id": 74,
     "originalId": 82,
     "name": "Seiwan",
     "fullName": "Seiwan Territory",
@@ -1902,16 +1831,16 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 271,
     "cy": 384,
     "neighbors": [
-      71,
-      78,
-      82,
-      85
+      68,
+      75,
+      79,
+      82
     ],
     "cellCount": 194,
     "income": 6
   },
   {
-    "id": 78,
+    "id": 75,
     "originalId": 83,
     "name": "Kwunia",
     "fullName": "Kwunia Land",
@@ -1925,17 +1854,17 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 338,
     "cy": 401,
     "neighbors": [
-      29,
-      72,
-      76,
-      77,
-      82
+      27,
+      69,
+      73,
+      74,
+      79
     ],
     "cellCount": 82,
     "income": 6
   },
   {
-    "id": 79,
+    "id": 76,
     "originalId": 84,
     "name": "Huangtian",
     "fullName": "Huangtian Territory",
@@ -1949,21 +1878,21 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 776,
     "cy": 415,
     "neighbors": [
-      22,
-      80,
+      20,
+      77,
+      78,
       81,
-      84,
-      86,
-      110,
-      111,
-      112,
-      113
+      83,
+      107,
+      108,
+      109,
+      110
     ],
     "cellCount": 359,
     "income": 6
   },
   {
-    "id": 80,
+    "id": 77,
     "originalId": 85,
     "name": "Dadin Guo",
     "fullName": "Dadin Guo Region",
@@ -1977,27 +1906,27 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 974,
     "cy": 430,
     "neighbors": [
-      24,
-      43,
-      58,
-      59,
-      62,
-      79,
+      22,
+      41,
+      56,
+      57,
+      60,
+      76,
+      81,
       84,
-      87,
-      96,
-      97,
-      98,
+      93,
+      94,
+      95,
+      107,
       110,
-      113,
-      114,
-      116
+      111,
+      113
     ],
     "cellCount": 288,
     "income": 6
   },
   {
-    "id": 81,
+    "id": 78,
     "originalId": 86,
     "name": "Uljin",
     "fullName": "Uljin Territory",
@@ -2011,18 +1940,18 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 628,
     "cy": 454,
     "neighbors": [
-      75,
-      79,
+      72,
+      76,
+      80,
+      81,
       83,
-      84,
-      86,
-      88
+      85
     ],
     "cellCount": 240,
     "income": 6
   },
   {
-    "id": 82,
+    "id": 79,
     "originalId": 87,
     "name": "Bozbaykut",
     "fullName": "Bozbaykut Territory",
@@ -2036,20 +1965,20 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 393,
     "cy": 493,
     "neighbors": [
-      76,
-      77,
-      78,
-      83,
-      85,
-      89,
-      90,
-      99
+      73,
+      74,
+      75,
+      80,
+      82,
+      86,
+      87,
+      96
     ],
     "cellCount": 420,
     "income": 6
   },
   {
-    "id": 83,
+    "id": 80,
     "originalId": 88,
     "name": "Ayli",
     "fullName": "Ayli Territory",
@@ -2063,18 +1992,18 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 555,
     "cy": 490,
     "neighbors": [
-      75,
-      76,
-      81,
-      82,
-      88,
-      91
+      72,
+      73,
+      78,
+      79,
+      85,
+      88
     ],
     "cellCount": 131,
     "income": 6
   },
   {
-    "id": 84,
+    "id": 81,
     "originalId": 89,
     "name": "Bannurkal",
     "fullName": "Bannurkal Land",
@@ -2088,20 +2017,20 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 770,
     "cy": 502,
     "neighbors": [
+      21,
       23,
-      25,
-      79,
-      80,
-      81,
-      86,
-      87,
-      88
+      76,
+      77,
+      78,
+      83,
+      84,
+      85
     ],
     "cellCount": 157,
     "income": 6
   },
   {
-    "id": 85,
+    "id": 82,
     "originalId": 90,
     "name": "Yepemerdu",
     "fullName": "Yepemerdu Territory",
@@ -2115,15 +2044,15 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 261,
     "cy": 469,
     "neighbors": [
-      77,
-      82,
-      90
+      74,
+      79,
+      87
     ],
     "cellCount": 36,
     "income": 10
   },
   {
-    "id": 86,
+    "id": 83,
     "originalId": 91,
     "name": "Mysosapurgi",
     "fullName": "Mysosapurgi Region",
@@ -2137,15 +2066,15 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 716,
     "cy": 478,
     "neighbors": [
-      79,
-      81,
-      84
+      76,
+      78,
+      81
     ],
     "cellCount": 3,
     "income": 6
   },
   {
-    "id": 87,
+    "id": 84,
     "originalId": 92,
     "name": "Kundlagaon",
     "fullName": "Kundlagaon Region",
@@ -2159,19 +2088,19 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 937,
     "cy": 517,
     "neighbors": [
-      24,
-      25,
-      44,
-      80,
-      84,
-      92,
-      98
+      22,
+      23,
+      42,
+      77,
+      81,
+      89,
+      95
     ],
     "cellCount": 190,
     "income": 6
   },
   {
-    "id": 88,
+    "id": 85,
     "originalId": 93,
     "name": "Kargunka",
     "fullName": "Kargunka Territory",
@@ -2185,19 +2114,19 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 651,
     "cy": 544,
     "neighbors": [
-      20,
-      23,
+      18,
+      21,
+      78,
+      80,
       81,
-      83,
-      84,
-      91,
-      94
+      88,
+      91
     ],
     "cellCount": 184,
     "income": 6
   },
   {
-    "id": 89,
+    "id": 86,
     "originalId": 94,
     "name": "Bhatti",
     "fullName": "Bhatti Region",
@@ -2211,14 +2140,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 475,
     "cy": 545,
     "neighbors": [
-      82,
-      99
+      79,
+      96
     ],
     "cellCount": 15,
     "income": 10
   },
   {
-    "id": 90,
+    "id": 87,
     "originalId": 95,
     "name": "Desepe",
     "fullName": "Desepe Land",
@@ -2232,14 +2161,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 287,
     "cy": 540,
     "neighbors": [
-      82,
-      85
+      79,
+      82
     ],
     "cellCount": 18,
     "income": 14
   },
   {
-    "id": 91,
+    "id": 88,
     "originalId": 96,
     "name": "Tirtgopia",
     "fullName": "Tirtgopia Territory",
@@ -2253,15 +2182,15 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 558,
     "cy": 555,
     "neighbors": [
-      83,
-      88,
-      94
+      80,
+      85,
+      91
     ],
     "cellCount": 12,
     "income": 10
   },
   {
-    "id": 92,
+    "id": 89,
     "originalId": 97,
     "name": "Amvar",
     "fullName": "Amvar Land",
@@ -2275,14 +2204,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 995,
     "cy": 562,
     "neighbors": [
-      44,
-      87
+      42,
+      84
     ],
     "cellCount": 6,
     "income": 6
   },
   {
-    "id": 93,
+    "id": 90,
     "originalId": 98,
     "name": "Bansurgade",
     "fullName": "Bansurgade Land",
@@ -2296,14 +2225,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 844,
     "cy": 578,
     "neighbors": [
-      23,
-      25
+      21,
+      23
     ],
     "cellCount": 27,
     "income": 10
   },
   {
-    "id": 94,
+    "id": 91,
     "originalId": 99,
     "name": "Alihalia",
     "fullName": "Alihalia Clan",
@@ -2317,14 +2246,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 587,
     "cy": 601,
     "neighbors": [
-      88,
-      91
+      85,
+      88
     ],
     "cellCount": 6,
     "income": 14
   },
   {
-    "id": 95,
+    "id": 92,
     "originalId": 100,
     "name": "Namavako",
     "fullName": "Namavako Land",
@@ -2338,13 +2267,13 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 700,
     "cy": 616,
     "neighbors": [
-      20
+      18
     ],
     "cellCount": 11,
     "income": 10
   },
   {
-    "id": 96,
+    "id": 93,
     "originalId": 101,
     "name": "Suijian Guo",
     "fullName": "Suijian Guo Territory",
@@ -2358,15 +2287,15 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1071,
     "cy": 407,
     "neighbors": [
-      43,
-      62,
-      80
+      41,
+      60,
+      77
     ],
     "cellCount": 8,
     "income": 6
   },
   {
-    "id": 97,
+    "id": 94,
     "originalId": 102,
     "name": "Pin Guo",
     "fullName": "Pin Guo Land",
@@ -2380,14 +2309,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1053,
     "cy": 466,
     "neighbors": [
-      43,
-      80
+      41,
+      77
     ],
     "cellCount": 2,
     "income": 6
   },
   {
-    "id": 98,
+    "id": 95,
     "originalId": 103,
     "name": "Jixin Guo",
     "fullName": "Jixin Guo Territory",
@@ -2401,16 +2330,16 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1028,
     "cy": 499,
     "neighbors": [
-      43,
-      44,
-      80,
-      87
+      41,
+      42,
+      77,
+      84
     ],
     "cellCount": 4,
     "income": 6
   },
   {
-    "id": 99,
+    "id": 96,
     "originalId": 104,
     "name": "Bazyol",
     "fullName": "Bazyol Land",
@@ -2424,14 +2353,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 446,
     "cy": 557,
     "neighbors": [
-      82,
-      89
+      79,
+      86
     ],
     "cellCount": 9,
     "income": 14
   },
   {
-    "id": 100,
+    "id": 97,
     "originalId": 105,
     "name": "Bagia",
     "fullName": "Bagia Clan",
@@ -2445,13 +2374,13 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 746,
     "cy": 591,
     "neighbors": [
-      28
+      26
     ],
     "cellCount": 1,
     "income": 14
   },
   {
-    "id": 101,
+    "id": 98,
     "originalId": 106,
     "name": "Kyohe",
     "fullName": "Kyohe Land",
@@ -2465,15 +2394,15 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1378,
     "cy": 246,
     "neighbors": [
-      32,
-      51,
-      102
+      30,
+      49,
+      99
     ],
     "cellCount": 63,
     "income": 6
   },
   {
-    "id": 102,
+    "id": 99,
     "originalId": 107,
     "name": "Ashihoku",
     "fullName": "Ashihoku Territory",
@@ -2487,14 +2416,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1430,
     "cy": 295,
     "neighbors": [
-      31,
-      101
+      29,
+      98
     ],
     "cellCount": 38,
     "income": 10
   },
   {
-    "id": 103,
+    "id": 100,
     "originalId": 108,
     "name": "Hashiho",
     "fullName": "Hashiho Territory",
@@ -2508,16 +2437,16 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1301,
     "cy": 346,
     "neighbors": [
-      32,
-      33,
-      51,
-      105
+      30,
+      31,
+      49,
+      102
     ],
     "cellCount": 49,
     "income": 6
   },
   {
-    "id": 104,
+    "id": 101,
     "originalId": 109,
     "name": "Shimi",
     "fullName": "Shimi Territory",
@@ -2531,14 +2460,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1393,
     "cy": 377,
     "neighbors": [
-      31,
-      33
+      29,
+      31
     ],
     "cellCount": 52,
     "income": 6
   },
   {
-    "id": 105,
+    "id": 102,
     "originalId": 110,
     "name": "Yane",
     "fullName": "Yane Territory",
@@ -2552,14 +2481,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 1310,
     "cy": 387,
     "neighbors": [
-      33,
-      103
+      31,
+      100
     ],
     "cellCount": 25,
     "income": 6
   },
   {
-    "id": 106,
+    "id": 103,
     "originalId": 111,
     "name": "Yajingping",
     "fullName": "Yajingping Region",
@@ -2574,15 +2503,15 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cy": 192,
     "neighbors": [
       12,
-      34,
-      109,
-      110
+      32,
+      106,
+      107
     ],
     "cellCount": 220,
     "income": 6
   },
   {
-    "id": 107,
+    "id": 104,
     "originalId": 112,
     "name": "Turkbeli",
     "fullName": "Turkbeli Dependency",
@@ -2596,20 +2525,20 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 579,
     "cy": 233,
     "neighbors": [
-      21,
+      19,
+      33,
+      34,
       35,
-      36,
-      37,
-      73,
-      75,
-      109,
-      112
+      70,
+      72,
+      106,
+      109
     ],
     "cellCount": 175,
     "income": 6
   },
   {
-    "id": 108,
+    "id": 105,
     "originalId": 113,
     "name": "Deli",
     "fullName": "Deli Territory",
@@ -2623,14 +2552,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 487,
     "cy": 203,
     "neighbors": [
-      35,
-      36
+      33,
+      34
     ],
     "cellCount": 10,
     "income": 6
   },
   {
-    "id": 109,
+    "id": 106,
     "originalId": 114,
     "name": "Sinbongseon",
     "fullName": "Sinbongseon Land",
@@ -2644,19 +2573,19 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 713,
     "cy": 264,
     "neighbors": [
-      34,
-      37,
-      106,
+      32,
+      35,
+      103,
+      104,
       107,
-      110,
-      111,
-      112
+      108,
+      109
     ],
     "cellCount": 296,
     "income": 6
   },
   {
-    "id": 110,
+    "id": 107,
     "originalId": 115,
     "name": "Chan Guo",
     "fullName": "Chan Guo Territory",
@@ -2671,22 +2600,22 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cy": 300,
     "neighbors": [
       12,
+      55,
       57,
-      59,
-      79,
-      80,
+      76,
+      77,
+      103,
       106,
-      109,
+      108,
+      110,
       111,
-      113,
-      114,
-      116
+      113
     ],
     "cellCount": 310,
     "income": 6
   },
   {
-    "id": 111,
+    "id": 108,
     "originalId": 116,
     "name": "Liuzhou",
     "fullName": "Liuzhou Clan",
@@ -2700,16 +2629,16 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 773,
     "cy": 341,
     "neighbors": [
-      79,
-      109,
-      110,
-      112
+      76,
+      106,
+      107,
+      109
     ],
     "cellCount": 131,
     "income": 6
   },
   {
-    "id": 112,
+    "id": 109,
     "originalId": 117,
     "name": "Giriwong",
     "fullName": "Giriwong Region",
@@ -2723,17 +2652,17 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 649,
     "cy": 322,
     "neighbors": [
-      75,
-      79,
-      107,
-      109,
-      111
+      72,
+      76,
+      104,
+      106,
+      108
     ],
     "cellCount": 95,
     "income": 6
   },
   {
-    "id": 113,
+    "id": 110,
     "originalId": 118,
     "name": "Hejian Guo",
     "fullName": "Hejian Guo Land",
@@ -2747,15 +2676,15 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 886,
     "cy": 372,
     "neighbors": [
-      79,
-      80,
-      110
+      76,
+      77,
+      107
     ],
     "cellCount": 4,
     "income": 6
   },
   {
-    "id": 114,
+    "id": 111,
     "originalId": 119,
     "name": "Xipin Guo",
     "fullName": "Xipin Guo Tribe",
@@ -2769,14 +2698,14 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 912,
     "cy": 365,
     "neighbors": [
-      80,
-      110
+      77,
+      107
     ],
     "cellCount": 4,
     "income": 6
   },
   {
-    "id": 115,
+    "id": 112,
     "originalId": 120,
     "name": "Boyru",
     "fullName": "Boyru Tribe",
@@ -2790,13 +2719,13 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 508,
     "cy": 251,
     "neighbors": [
-      35
+      33
     ],
     "cellCount": 1,
     "income": 6
   },
   {
-    "id": 116,
+    "id": 113,
     "originalId": 121,
     "name": "Xunz Guo",
     "fullName": "Xunz Guo Land",
@@ -2810,9 +2739,9 @@ export const DOZIA_PROVINCES: NativeProvince[] = [
     "cx": 941,
     "cy": 366,
     "neighbors": [
-      59,
-      80,
-      110
+      57,
+      77,
+      107
     ],
     "cellCount": 4,
     "income": 6

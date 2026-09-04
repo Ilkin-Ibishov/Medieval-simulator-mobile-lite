@@ -11,7 +11,7 @@ Bu layihə **Medieval Simulator**-un ultra-yüngül, sürətli, Antiyoy / Age of
 * **Janr:** Mobil Turn-based Əyalət Strategiyası (Lite / Grand Conquest). Offline, tək oyunçu (və gələcək Liderlik/PvP), mobil-first (Capacitor → Android APK / Google Play).
 * **Əsas Döngü:** Əyalət gəliri (Qızıl) → Qoşun maaşı (Upkeep) → Döyüş və Sürətli Genişlənmə → 5–15 dəqiqəlik bitən partiyalar.
 * **Xəritələr:**
-  1. **👑 Böyük Dozia Kampaniyası (Nativ Atlas):** 117 sıfır-drift əyalət, 10 tarixi krallıq, dinamik üzən dövlət adları, təmizlənmiş daxili tikişlər və ada dəniz yolları.
+  1. **👑 Böyük Dozia Kampaniyası (Nativ Atlas):** 114 sıfır-drift əyalət, 9 tarixi krallıq, dinamik üzən dövlət adları, təmizlənmiş daxili tikişlər və ada dəniz yolları.
   2. **⚡ Sürətli Təsadüfi Oyun (Prosedural Voronoi):** 16–28 region, sürətli vizual toxunuş və axıcı 60fps animasiyalar.
 * **Canlı İctimai Link:** [https://medieval-sim-lite.vercel.app](https://medieval-sim-lite.vercel.app)
 * **GitHub Repozitoriyası:** [https://github.com/Ilkin-Ibishov/Medieval-simulator-mobile-lite](https://github.com/Ilkin-Ibishov/Medieval-simulator-mobile-lite)

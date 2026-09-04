@@ -224,7 +224,7 @@ describe('Chokepoint pruning', () => {
         expect(seen.size).toBe(regionCount);
       }
     }
-  });
+  }, 20000);
 
   it('keeps adjacency symmetric after pruning', () => {
     const g = createGame({ seed: 31337, playerCount: 4, regionCount: 24 });

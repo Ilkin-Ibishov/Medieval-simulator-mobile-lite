@@ -646,8 +646,8 @@ export const App: React.FC = () => {
             handleStartGame({
               mode: 'CAMPAIGN',
               chosenKingdomId: pickingKingdomId,
-              regionCount: 117,
-              playerCount: 10,
+              regionCount: 114,
+              playerCount: 9,
               seed: Math.floor(Math.random() * 99999) + 1,
               maxTurns: 60,
               scenario: selectedScenario,

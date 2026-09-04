@@ -4,9 +4,9 @@ import { computeBotActions } from '../../ai/bot';
 import { calculatePlayerIncome, calculatePlayerUpkeep } from '../rules';
 
 describe('Dozia Grand Campaign Mode', () => {
-  it('loads Dozia master map with 117 consolidated provinces and 10 kingdoms', () => {
+  it('loads Dozia master map with 114 consolidated provinces and 9 kingdoms', () => {
     const map = getDoziaMapData();
-    expect(map.regions.length).toBe(117);
+    expect(map.regions.length).toBe(114);
     expect(map.width).toBe(1536);
     expect(map.height).toBe(730);
 
@@ -20,7 +20,7 @@ describe('Dozia Grand Campaign Mode', () => {
     }
   });
 
-  it('initializes authentic 10-kingdom campaign with human player and AI bots', () => {
+  it('initializes authentic 9-kingdom campaign with human player and AI bots', () => {
     const map = getDoziaMapData();
     const game = createGame({
       seed: 4242,
@@ -30,25 +30,25 @@ describe('Dozia Grand Campaign Mode', () => {
       humanCount: 1,
     });
 
-    expect(game.players.length).toBe(10);
-    expect(game.regionState.length).toBe(117);
+    expect(game.players.length).toBe(9);
+    expect(game.regionState.length).toBe(114);
 
     // Player 0 (chosen kingdom) is human
     expect(game.players[0].isAi).toBe(false);
     expect(game.players[0].name).toContain('(Sən)');
 
-    // Other 9 players are AI
-    for (let i = 1; i < 10; i++) {
+    // Other 8 players are AI
+    for (let i = 1; i < 9; i++) {
       expect(game.players[i].isAi).toBe(true);
       expect(game.players[i].isAlive).toBe(true);
       expect(game.players[i].treasury).toBe(RULES.startingTreasury);
     }
 
-    // Every province is owned by one of the 10 kingdoms
+    // Every province is owned by one of the 9 kingdoms
     for (let i = 0; i < game.regionState.length; i++) {
       const owner = game.regionState[i].owner;
       expect(owner).toBeGreaterThanOrEqual(0);
-      expect(owner).toBeLessThan(10);
+      expect(owner).toBeLessThan(9);
       expect(game.regionState[i].troops).toBeGreaterThanOrEqual(4);
     }
 
