@@ -472,7 +472,7 @@ export const MapView: React.FC<MapViewProps> = ({
         onPointerLeave={onPointerUp}
       >
         {/* Floating Map Navigation & Zoom Controls */}
-        <div className="map-zoom-controls">
+        <div className={`map-zoom-controls ${isPickingRealm ? 'picker-mode' : ''}`}>
           <button
             className="zoom-btn"
             onClick={handleZoomIn}

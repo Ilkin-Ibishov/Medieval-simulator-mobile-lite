@@ -545,6 +545,10 @@ body::after {
   z-index: 25;
 }
 
+.map-zoom-controls.picker-mode {
+  top: max(56px, calc(env(safe-area-inset-top) + 50px));
+}
+
 .zoom-btn {
   width: 38px;
   height: 38px;
@@ -1792,6 +1796,20 @@ body::after {
   color: #fae19c;
   border: 1px solid rgba(217, 164, 58, 0.6);
   box-shadow: 0 2px 8px rgba(217, 164, 58, 0.2);
+}
+
+@media (max-width: 420px) {
+  .btn-picker-back {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+  .scenario-tab-btn {
+    padding: 5px 8px;
+    font-size: 0.7rem;
+  }
+  .map-zoom-controls.picker-mode {
+    top: max(50px, calc(env(safe-area-inset-top) + 46px));
+  }
 }
 
 .realm-picker-guide-pill {
